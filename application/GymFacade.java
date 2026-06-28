@@ -39,6 +39,5 @@ public class GymFacade {
 
     //Training
     public Training createTraining(TrainingCreateDto dto) {return trainingService.createTraining(dto);}
-    public Training updateTraining(TrainingUpdateDto dto) {return trainingService.updateTraining(dto);}
     public Training getTraining(TrainingId id) {return trainingService.getTraining(id);}
 }

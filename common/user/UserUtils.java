@@ -5,18 +5,18 @@ import com.example.gym_crm.trainer.TrainerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Random;
+import java.security.SecureRandom;
 
 @Component
 public class UserUtils {
 
     private TrainerRepository trainerRepository;
     private TraineeRepository traineeRepository;
-    private final Random random;
 
-    {
-        random = new Random();
-    }
+    private static final String CHARACTERS =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}|;:,.<>?";
+
+    private static final SecureRandom random = new SecureRandom();
 
     @Autowired
     public void setTrainerRepository(TrainerRepository trainerRepository) {
@@ -49,11 +49,14 @@ public class UserUtils {
     }
 
     public  String generatePassword() {
-        StringBuilder resPassword= new StringBuilder();
-        for(int i=0; i<10;i++){
-            resPassword.append(random.nextInt(10));
+        int length = 10;
+        StringBuilder password = new StringBuilder(length);
+
+        for (int i = 0; i < length; i++) {
+            int randomIndex = random.nextInt(CHARACTERS.length());
+            password.append(CHARACTERS.charAt(randomIndex));
         }
 
-        return resPassword.toString();
+        return password.toString();
     }
 }

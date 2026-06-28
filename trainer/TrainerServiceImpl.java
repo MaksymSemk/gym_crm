@@ -57,13 +57,20 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     public Trainer createTrainer(TrainerCreateDto trainerCreateDto) {
+        if (trainerCreateDto == null) {
+            throw new IllegalArgumentException("Trainer create DTO cannot be null");
+        }
+
+        if (trainerCreateDto.specialization() == null || trainerCreateDto.specialization().isEmpty()) {
+            throw new IllegalArgumentException("Trainer must have at least one specialization (training type)");
+        }
+
+        if (!isAllSpecializationsExist(trainerCreateDto.specialization())){
+            throw new EntityDoesNotExistException("One or more specializations do not exist");
+        }
 
         String username = userUtils.createUsername(trainerCreateDto.firstName(),  trainerCreateDto.lastName());
         String password= userUtils.generatePassword();
-
-        if (!isAllSpecializationsExist(trainerCreateDto.specialization())){
-            throw new EntityDoesNotExistException("Specialization does not exist");
-        }
 
         Trainer newTrainer = new Trainer(
                 trainerCreateDto.firstName(),

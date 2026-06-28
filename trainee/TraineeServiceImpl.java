@@ -98,7 +98,7 @@ public class TraineeServiceImpl implements TraineeService {
             trainee.setDateOfBirth(traineeUpdateDto.dateOfBirth());
         }
 
-        if(traineeUpdateDto.address()!=null && traineeUpdateDto.address().isEmpty()){
+        if(traineeUpdateDto.address()!=null && !traineeUpdateDto.address().isBlank()){
             trainee.setAddress(traineeUpdateDto.address());
         }
 

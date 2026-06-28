@@ -65,37 +65,6 @@ public class TrainingServiceImpl implements TrainingService {
         return savedTraining;
     }
 
-    @Override
-    public Training updateTraining(TrainingUpdateDto trainingUpdateDto) {
-        if (trainingUpdateDto == null) {
-            throw new IllegalArgumentException("Training update DTO cannot be null");
-        }
-
-        if (trainingUpdateDto.trainingId() == null) {
-            throw new IllegalArgumentException("Training ID cannot be null");
-        }
-
-        var training = trainingRepository.findById(trainingUpdateDto.trainingId()).orElseThrow(
-                () -> new EntityDoesNotExistException("There is no training with id " + trainingUpdateDto.trainingId())
-        );
-
-        if (trainingUpdateDto.trainingName() != null && !trainingUpdateDto.trainingName().isEmpty()) {
-            training.setTrainingName(trainingUpdateDto.trainingName());
-        }
-
-        if (trainingUpdateDto.trainingTypes() != null && !trainingUpdateDto.trainingTypes().isEmpty()) {
-            validateTrainingTypes(trainingUpdateDto.trainingTypes(), trainingUpdateDto.trainingId().trainerId());
-            training.setTrainingTypes(trainingUpdateDto.trainingTypes());
-        }
-
-        if (trainingUpdateDto.trainingDuration() != null) {
-            training.setTrainingDuration(trainingUpdateDto.trainingDuration());
-        }
-
-        Training updatedTraining = trainingRepository.update(training);
-        log.info("Successfully updated training ID: {}", updatedTraining.getId());
-        return updatedTraining;
-    }
 
     private void validateTrainingCreation(TrainingCreateDto trainingCreateDto) {
         if( trainingRepository.existsById(trainingCreateDto.trainingId())) {
