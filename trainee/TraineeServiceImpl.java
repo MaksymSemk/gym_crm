@@ -20,10 +20,8 @@ import java.util.UUID;
 @Slf4j
 public class TraineeServiceImpl implements TraineeService {
 
-    @Autowired
     private TraineeRepository traineeRepository;
 
-    @Autowired
     private TrainingRepository trainingRepository;
 
     private UserUtils userUtils;
@@ -31,6 +29,16 @@ public class TraineeServiceImpl implements TraineeService {
     @Autowired
     public void setUserUtils(UserUtils userUtils) {
         this.userUtils = userUtils;
+    }
+
+    @Autowired
+    public void setTrainingRepository(TrainingRepository trainingRepository) {
+        this.trainingRepository = trainingRepository;
+    }
+
+    @Autowired
+    public void setTraineeRepository(TraineeRepository traineeRepository) {
+        this.traineeRepository = traineeRepository;
     }
 
     @Override

@@ -20,17 +20,30 @@ import java.util.UUID;
 @Service
 public class TrainingServiceImpl implements TrainingService {
 
-    @Autowired
     private TrainingRepository trainingRepository;
-
-    @Autowired
     private TrainingTypeRepository trainingTypeRepository;
-
-    @Autowired
     private TrainerRepository trainerRepository;
+    private TraineeRepository traineeRepository;
 
     @Autowired
-    private TraineeRepository traineeRepository;
+    public void setTrainerRepository(TrainerRepository trainerRepository) {
+        this.trainerRepository = trainerRepository;
+    }
+
+    @Autowired
+    public void setTraineeRepository(TraineeRepository traineeRepository) {
+        this.traineeRepository = traineeRepository;
+    }
+
+    @Autowired
+    public void setTrainingTypeRepository(TrainingTypeRepository trainingTypeRepository) {
+        this.trainingTypeRepository = trainingTypeRepository;
+    }
+
+    @Autowired
+    public void setTrainingRepository(TrainingRepository trainingRepository) {
+        this.trainingRepository = trainingRepository;
+    }
 
     @Override
     public Training createTraining(TrainingCreateDto trainingCreateDto) {

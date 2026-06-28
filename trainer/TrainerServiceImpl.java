@@ -21,18 +21,26 @@ import java.util.UUID;
 @Service
 public class TrainerServiceImpl implements TrainerService {
 
-    @Autowired
     private TrainerRepository trainerRepository;
 
     private UserUtils userUtils;
     private TrainingTypeRepository trainingTypeRepository;
 
-    @Autowired
     private TrainingRepository trainingRepository;
 
     @Autowired
     public void setUserUtils(UserUtils userUtils) {
         this.userUtils = userUtils;
+    }
+
+    @Autowired
+    public void setTrainerRepository(TrainerRepository trainerRepository) {
+        this.trainerRepository = trainerRepository;
+    }
+
+    @Autowired
+    public void setTrainingRepository(TrainingRepository trainingRepository) {
+        this.trainingRepository = trainingRepository;
     }
 
     @Autowired
@@ -99,7 +107,8 @@ public class TrainerServiceImpl implements TrainerService {
 
         Trainer updatedTrainer = trainerRepository.update(trainer);
         log.info("Successfully updated trainer ID: {}", updatedTrainer.getUserId());
-        return updatedTrainer;    }
+        return updatedTrainer;
+    }
 
 
 

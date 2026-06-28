@@ -9,6 +9,7 @@ import com.example.gym_crm.training_type.TrainingType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
+@Slf4j
 @Component
 public class StorageInitializationPostProcessor implements BeanPostProcessor {
 
@@ -62,7 +64,7 @@ public class StorageInitializationPostProcessor implements BeanPostProcessor {
             case "trainingTypeStorage" ->
                     loadStorageData((Map<String, TrainingType>) bean, trainingTypeFilePath, TrainingType.class, TrainingType::getId);
         }
-        System.out.println("StorageInitializationPostProcessor: Initialized storage for bean: " + beanName);
+        log.info("StorageInitializationPostProcessor: Initialized storage for bean: {}", beanName);
         return bean;
     }
 
