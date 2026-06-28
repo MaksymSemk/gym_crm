@@ -6,15 +6,11 @@ import com.example.gym_crm.trainee.TraineeRepository;
 import com.example.gym_crm.trainer.TrainerRepository;
 import com.example.gym_crm.trainer.TrainingDoesNotBelongToTrainerException;
 import com.example.gym_crm.training.Dto.TrainingCreateDto;
-import com.example.gym_crm.training.Dto.TrainingUpdateDto;
 import com.example.gym_crm.training_type.TrainingType;
 import com.example.gym_crm.training_type.TrainingTypeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Set;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -51,6 +47,8 @@ public class TrainingServiceImpl implements TrainingService {
             throw new IllegalArgumentException("Training create DTO cannot be null");
         }
 
+        log.debug("Creating training with ID: {} and name: {}", trainingCreateDto.trainingId(), trainingCreateDto.trainingName());
+
         validateTrainingCreation(trainingCreateDto);
 
         Training newTraining = new Training(
@@ -60,9 +58,7 @@ public class TrainingServiceImpl implements TrainingService {
                 trainingCreateDto.trainingDuration()
         );
 
-        Training savedTraining = trainingRepository.save(newTraining);
-        log.info("Successfully created training. ID: {}", savedTraining.getId());
-        return savedTraining;
+        return trainingRepository.create(newTraining);
     }
 
 
@@ -90,29 +86,16 @@ public class TrainingServiceImpl implements TrainingService {
 
     }
 
-    private void validateTrainingTypes(Set<TrainingType> trainingTypes, UUID trainerId) {
-        var trainer = trainerRepository.findById(trainerId).orElseThrow(
-                () -> new EntityDoesNotExistException("Trainer with id " + trainerId + " does not exist")
-        );
-
-        for (TrainingType trainingType : trainingTypes) {
-            if (!trainingTypeRepository.existsById(trainingType.getId())) {
-                throw new EntityDoesNotExistException("Training type with id " + trainingType.getId() + " does not exist");
-            }
-            if (!trainer.getSpecialization().contains(trainingType)) {
-                throw new TrainingDoesNotBelongToTrainerException("Trainer with id " + trainer.getId() + " is not specialized in training type " + trainingType.getName());
-            }
-        }
-    }
-
     @Override
     public Training getTraining(TrainingId id) {
+        log.debug("Fetching training with ID: {}", id);
         if (id == null) {
             throw new IllegalArgumentException("Training ID cannot be null");
         }
 
-        return trainingRepository.findById(id).orElseThrow(
-                () -> new EntityDoesNotExistException("There is no training with id " + id)
+        var res = trainingRepository.findById(id).orElseThrow(
+                () ->  new EntityDoesNotExistException("There is no training with id " + id)
         );
+        return res;
     }
 }

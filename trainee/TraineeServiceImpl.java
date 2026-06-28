@@ -46,6 +46,8 @@ public class TraineeServiceImpl implements TraineeService {
         if (traineeCreateDto == null) {
             throw new IllegalArgumentException("Trainee create DTO cannot be null");
         }
+
+        log.debug("Creating trainee with first name: {} and last name: {}", traineeCreateDto.firstName(), traineeCreateDto.lastName());
         if (traineeCreateDto.dateOfBirth().isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("Date of birth cannot be in the future");
         }
@@ -63,8 +65,8 @@ public class TraineeServiceImpl implements TraineeService {
                 null
         );
 
-        Trainee savedTrainee = traineeRepository.save(newTrainee);
-        log.info("Successfully created trainee. ID: {}, Username: {}", savedTrainee.getId(), username);
+        Trainee savedTrainee = traineeRepository.create(newTrainee);
+        log.debug("Created trainee: {}", savedTrainee.getId());
         return savedTrainee;
     }
 
@@ -74,6 +76,7 @@ public class TraineeServiceImpl implements TraineeService {
             throw new IllegalArgumentException("Trainee update DTO cannot be null");
         }
 
+        log.debug("Updating trainee with ID: {}", traineeUpdateDto.userId());
         if (traineeUpdateDto.userId() == null) {
             throw new IllegalArgumentException("Trainee user ID cannot be null");
         }
@@ -108,7 +111,6 @@ public class TraineeServiceImpl implements TraineeService {
         }
 
         Trainee updatedTrainee = traineeRepository.update(trainee);
-        log.info("Successfully updated trainee ID: {}", updatedTrainee.getId());
         return updatedTrainee;
     }
 
@@ -131,9 +133,9 @@ public class TraineeServiceImpl implements TraineeService {
         if (id == null){
             throw new IllegalArgumentException("Trainee id cannot be null");
         }
+        log.warn("Attempting to delete trainee with ID: {}", id);
 
         traineeRepository.delete(id);
-        log.info("Successfully deleted trainee ID: {}", id);
     }
 
     @Override
@@ -141,6 +143,8 @@ public class TraineeServiceImpl implements TraineeService {
         if (id == null) {
             throw new IllegalArgumentException("Trainee id cannot be null");
         }
+
+        log.debug("Retrieving trainee with ID: {}", id);
         return traineeRepository.findById(id).orElseThrow(
                 ()-> new EntityDoesNotExistException("There is no trainee with id " + id)
         );

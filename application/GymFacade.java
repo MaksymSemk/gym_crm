@@ -9,7 +9,6 @@ import com.example.gym_crm.trainer.Dto.TrainerUpdateDto;
 import com.example.gym_crm.trainer.Trainer;
 import com.example.gym_crm.trainer.TrainerService;
 import com.example.gym_crm.training.Dto.TrainingCreateDto;
-import com.example.gym_crm.training.Dto.TrainingUpdateDto;
 import com.example.gym_crm.training.Training;
 import com.example.gym_crm.training.TrainingId;
 import com.example.gym_crm.training.TrainingService;

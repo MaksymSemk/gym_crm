@@ -84,7 +84,7 @@ public class StorageInitializationPostProcessor implements BeanPostProcessor {
             List<V> items = objectMapper.readValue(is, listType);
 
             items.forEach(item -> storage.put(keyExtractor.apply(item), item));
-
+            log.debug("StorageInitializationPostProcessor: Loaded {} items into storage from file: {}", items.size(), path);
         } catch (Exception e) {
             throw new IllegalStateException(
                     String.format("Jackson failed to parse initialization file [%s] for type [%s]", path, valueType.getSimpleName()), e

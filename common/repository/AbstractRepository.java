@@ -23,7 +23,7 @@ public abstract class AbstractRepository<ID, DAO extends EntityId<ID>> implement
     }
 
     @Override
-    public DAO save(DAO dao) {
+    public DAO create(DAO dao) {
         dao.setId(idGenerator.generateNewId(dao));
         storage.put(dao.getId(), dao);
         return dao;

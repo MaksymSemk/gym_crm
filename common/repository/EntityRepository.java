@@ -7,7 +7,7 @@ public interface EntityRepository<ID, DAO> {
 
     Optional<DAO> findById(ID id);
     Collection<DAO> findAll();
-    DAO save(DAO dao);
+    DAO create(DAO dao);
     DAO update(DAO dao);
     void delete(ID id);
     boolean existsById(ID id);

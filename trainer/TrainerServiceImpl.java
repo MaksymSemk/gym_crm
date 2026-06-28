@@ -50,6 +50,7 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     public Trainer getTrainerByID(UUID uuid) {
+        log.debug("Fetching trainer with ID: {}", uuid);
         return trainerRepository.findById(uuid).orElseThrow(
                 ()-> new EntityDoesNotExistException("There is no trainer with id " + uuid)
         );
@@ -60,6 +61,8 @@ public class TrainerServiceImpl implements TrainerService {
         if (trainerCreateDto == null) {
             throw new IllegalArgumentException("Trainer create DTO cannot be null");
         }
+
+        log.debug("Creating trainer with first name: {} and last name: {}", trainerCreateDto.firstName(), trainerCreateDto.lastName());
 
         if (trainerCreateDto.specialization() == null || trainerCreateDto.specialization().isEmpty()) {
             throw new IllegalArgumentException("Trainer must have at least one specialization (training type)");
@@ -81,13 +84,13 @@ public class TrainerServiceImpl implements TrainerService {
                 trainerCreateDto.specialization()
         );
 
-        Trainer savedTrainer = trainerRepository.save(newTrainer);
-        log.info("Successfully created trainer. ID: {}, Username: {}", savedTrainer.getUserId(), username);
-        return savedTrainer;
+        return trainerRepository.create(newTrainer);
     }
 
     @Override
     public Trainer updateTrainer(TrainerUpdateDto trainerUpdateDto) {
+        log.debug("Updating trainer with ID: {}", trainerUpdateDto.userId());
+
         var trainer = trainerRepository.findById(trainerUpdateDto.userId()).orElseThrow(
                 ()-> new EntityDoesNotExistException("There is no trainer with id " + trainerUpdateDto.userId())
         );
@@ -113,7 +116,6 @@ public class TrainerServiceImpl implements TrainerService {
         }
 
         Trainer updatedTrainer = trainerRepository.update(trainer);
-        log.info("Successfully updated trainer ID: {}", updatedTrainer.getUserId());
         return updatedTrainer;
     }
 
