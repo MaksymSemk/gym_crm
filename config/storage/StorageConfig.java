@@ -1,4 +1,4 @@
-package com.example.gym_crm.config;
+package com.example.gym_crm.config.storage;
 
 import com.example.gym_crm.training.Training;
 import com.example.gym_crm.training.TrainingId;
@@ -13,22 +13,22 @@ import java.util.*;
 @Configuration
 public class StorageConfig {
 
-    @Bean
+    @Bean(name= "trainerStorage")
     public Map<UUID, Trainer> trainerStorage() {
         return new HashMap<>();
     }
 
-    @Bean
+    @Bean(name= "traineeStorage")
     public Map<UUID, Trainee> traineeStorage() {
         return new HashMap<>();
     }
 
-    @Bean
+    @Bean(name= "trainingTypeStorage")
     public Map<String, TrainingType> trainingTypeStorage() {
         return new HashMap<>();
     }
 
-    @Bean
+    @Bean(name= "trainingStorage")
     public Map<TrainingId, Training> trainingStorage() {
         return new HashMap<>();
     }
