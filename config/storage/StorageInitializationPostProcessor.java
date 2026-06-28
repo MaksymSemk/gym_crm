@@ -47,6 +47,10 @@ public class StorageInitializationPostProcessor implements BeanPostProcessor {
     @Override
     @SuppressWarnings("unchecked")
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        if (!beanName.endsWith("Storage")) {
+            return bean;
+        }
+
         if (!(bean instanceof Map)) {
             return bean;
         }
