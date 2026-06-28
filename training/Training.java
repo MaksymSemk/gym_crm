@@ -4,6 +4,7 @@ import com.example.gym_crm.common.repository.EntityId;
 import com.example.gym_crm.training_type.TrainingType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
@@ -13,6 +14,7 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class Training implements EntityId<TrainingId> {
     private TrainingId id;
 

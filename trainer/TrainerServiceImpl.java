@@ -85,7 +85,7 @@ public class TrainerServiceImpl implements TrainerService {
             trainer.setSpecialization(trainerUpdateDto.specialization());
         }
         if(trainerUpdateDto.isActive()!=null){
-            trainer.setActive(trainerUpdateDto.isActive());
+            trainer.setIsActive(trainerUpdateDto.isActive());
         }
 
         if(trainerUpdateDto.trainingIds() != null){

@@ -2,8 +2,10 @@ package com.example.gym_crm.training_type;
 
 import com.example.gym_crm.common.repository.EntityId;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class TrainingType implements EntityId<String> {
     private String name;
 

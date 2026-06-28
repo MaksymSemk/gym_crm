@@ -2,9 +2,11 @@ package com.example.gym_crm.common.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class User {
 
     private String firstName;
@@ -15,7 +17,7 @@ public class User {
 
     private String password;
 
-    private boolean isActive;
+    private Boolean isActive;
 
     public boolean updateIdentity(PersonalIdentity identity) {
         boolean updated = false;

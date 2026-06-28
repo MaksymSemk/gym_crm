@@ -5,12 +5,14 @@ import com.example.gym_crm.training.Training;
 import com.example.gym_crm.common.user.User;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.*;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
+@NoArgsConstructor
 public class Trainee extends User implements EntityId<UUID> {
 
     private LocalDate dateOfBirth;

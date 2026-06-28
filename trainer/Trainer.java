@@ -6,11 +6,13 @@ import com.example.gym_crm.training_type.TrainingType;
 import com.example.gym_crm.common.user.User;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.util.*;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
+@NoArgsConstructor
 public class Trainer extends User implements EntityId<UUID> {
 
     private Set<TrainingType> specialization;

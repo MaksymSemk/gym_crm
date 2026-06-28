@@ -75,7 +75,7 @@ public class TraineeServiceImpl implements TraineeService {
         }
 
         if(traineeUpdateDto.isActive()!=null){
-            trainee.setActive(traineeUpdateDto.isActive());
+            trainee.setIsActive(traineeUpdateDto.isActive());
         }
 
         if (traineeUpdateDto.dateOfBirth() != null) {
