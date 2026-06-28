@@ -7,6 +7,7 @@ import com.example.gym_crm.trainee.Dto.TraineeUpdateDto;
 import com.example.gym_crm.training.Training;
 import com.example.gym_crm.training.TrainingId;
 import com.example.gym_crm.training.TrainingRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class TraineeServiceImpl implements TraineeService {
 
     @Autowired
@@ -52,7 +54,10 @@ public class TraineeServiceImpl implements TraineeService {
                 traineeCreateDto.address(),
                 null
         );
-        return traineeRepository.save(newTrainee);
+
+        Trainee savedTrainee = traineeRepository.save(newTrainee);
+        log.info("Successfully created trainee. ID: {}, Username: {}", savedTrainee.getId(), username);
+        return savedTrainee;
     }
 
     @Override
@@ -94,7 +99,9 @@ public class TraineeServiceImpl implements TraineeService {
             trainee.setTrainings(updatedTrainings);
         }
 
-        return traineeRepository.update(trainee);
+        Trainee updatedTrainee = traineeRepository.update(trainee);
+        log.info("Successfully updated trainee ID: {}", updatedTrainee.getId());
+        return updatedTrainee;
     }
 
     private Set<Training> validateTrainings(Set<TrainingId> trainingIds, UUID traineeId) {
@@ -118,6 +125,7 @@ public class TraineeServiceImpl implements TraineeService {
         }
 
         traineeRepository.delete(id);
+        log.info("Successfully deleted trainee ID: {}", id);
     }
 
     @Override

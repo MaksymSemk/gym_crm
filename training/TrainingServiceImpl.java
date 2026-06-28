@@ -9,12 +9,14 @@ import com.example.gym_crm.training.Dto.TrainingCreateDto;
 import com.example.gym_crm.training.Dto.TrainingUpdateDto;
 import com.example.gym_crm.training_type.TrainingType;
 import com.example.gym_crm.training_type.TrainingTypeRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class TrainingServiceImpl implements TrainingService {
 
@@ -45,7 +47,9 @@ public class TrainingServiceImpl implements TrainingService {
                 trainingCreateDto.trainingDuration()
         );
 
-        return trainingRepository.save(newTraining);
+        Training savedTraining = trainingRepository.save(newTraining);
+        log.info("Successfully created training. ID: {}", savedTraining.getId());
+        return savedTraining;
     }
 
     @Override
@@ -75,7 +79,9 @@ public class TrainingServiceImpl implements TrainingService {
             training.setTrainingDuration(trainingUpdateDto.trainingDuration());
         }
 
-        return trainingRepository.update(training);
+        Training updatedTraining = trainingRepository.update(training);
+        log.info("Successfully updated training ID: {}", updatedTraining.getId());
+        return updatedTraining;
     }
 
     private void validateTrainingCreation(TrainingCreateDto trainingCreateDto) {

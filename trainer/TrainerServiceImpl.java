@@ -9,6 +9,7 @@ import com.example.gym_crm.training.TrainingId;
 import com.example.gym_crm.training.TrainingRepository;
 import com.example.gym_crm.training_type.TrainingType;
 import com.example.gym_crm.training_type.TrainingTypeRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class TrainerServiceImpl implements TrainerService {
 
@@ -64,7 +66,9 @@ public class TrainerServiceImpl implements TrainerService {
                 trainerCreateDto.specialization()
         );
 
-        return trainerRepository.save(newTrainer);
+        Trainer savedTrainer = trainerRepository.save(newTrainer);
+        log.info("Successfully created trainer. ID: {}, Username: {}", savedTrainer.getUserId(), username);
+        return savedTrainer;
     }
 
     @Override
@@ -93,8 +97,9 @@ public class TrainerServiceImpl implements TrainerService {
             trainer.setTrainings(updatedTrainings);
         }
 
-        return trainerRepository.update(trainer);
-    }
+        Trainer updatedTrainer = trainerRepository.update(trainer);
+        log.info("Successfully updated trainer ID: {}", updatedTrainer.getUserId());
+        return updatedTrainer;    }
 
 
 
