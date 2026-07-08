@@ -1,0 +1,23 @@
+name: epam-gym-crm
+
+services:
+  gym-crm-db:
+    image: postgres:17-alpine
+    container_name: gym-crm-db
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_DB: gym_crm_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      TZ: Europe/Kyiv
+    networks:
+      - GYM_CRM
+    volumes:
+      - gym_crm_data:/var/lib/postgresql/data
+
+networks:
+  GYM_CRM:
+
+volumes:
+  gym_crm_data:
