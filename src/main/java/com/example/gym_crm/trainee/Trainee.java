@@ -1,40 +1,45 @@
 package com.example.gym_crm.trainee;
 
 import com.example.gym_crm.common.repository.EntityId;
-import com.example.gym_crm.training.Training;
 import com.example.gym_crm.common.user.User;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.UUID;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-public class Trainee extends User implements EntityId<UUID> {
+@Entity
+@Table(name = "trainees")
+public class Trainee implements EntityId<UUID> {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
+
+    @Column(nullable = false)
     private LocalDate dateOfBirth;
-    private String address;
-    private UUID userId;
-    private Set<Training> trainings;
 
-    public Trainee(String firstName, String lastName, String username, String password, boolean isActive, LocalDate dateOfBirth, String address, UUID userId) {
-        super(firstName, lastName, username, password, isActive);
-        this.dateOfBirth = dateOfBirth;
-        this.address = address;
-        this.userId = userId;
-        this.trainings = new HashSet<>();
-    }
+    @Column(nullable = false)
+    private String address;
+
+//    @Column(nullable = false)
+//    private Set<Training> trainings;
+//
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
 
     @Override
     public UUID getId() {
-        return userId;
+        return user.getId();
     }
 
     @Override
-    public void setId(UUID uuid) {
-        this.userId = uuid;
+    public void setId(UUID id) {
+        this.user.setId(id);
     }
 }
