@@ -24,8 +24,10 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.46")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.22.0")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.22.0")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-test:4.1.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa:4.1.0")
+    runtimeOnly("org.postgresql:postgresql:42.7.13")
 }
 
 tasks.withType<Test> {
