@@ -29,6 +29,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa:4.1.0")
     implementation("org.springframework.boot:spring-boot-starter-aop:4.0.0-M2")
     runtimeOnly("org.postgresql:postgresql:42.7.13")
+    implementation("org.springframework.boot:spring-boot-starter-validation:4.1.0")
 }
 
 tasks.withType<Test> {

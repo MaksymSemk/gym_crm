@@ -1,19 +1,17 @@
 package com.example.gym_crm.trainer.Dto;
 
 import com.example.gym_crm.authentification.AuthData;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import java.time.LocalDate;
 
-@Getter
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class TrainerTrainingsSearchDto extends AuthData {
-    private final LocalDate fromDate;
-    private final LocalDate toDate;
-    private final String traineeName;
+    private LocalDate fromDate;
+    private LocalDate toDate;
+    private String traineeName;
 
-    public TrainerTrainingsSearchDto(String username, String password, LocalDate fromDate, LocalDate toDate, String traineeName) {
-        super(username, password);
-        this.fromDate = fromDate;
-        this.toDate = toDate;
-        this.traineeName = traineeName;
-    }
 }
