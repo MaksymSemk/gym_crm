@@ -1,7 +1,5 @@
 package com.example.gym_crm.common.user;
 
-import com.example.gym_crm.trainee.TraineeRepository;
-import com.example.gym_crm.trainer.TrainerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

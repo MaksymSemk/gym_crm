@@ -2,11 +2,11 @@ package com.example.gym_crm.training;
 
 import com.example.gym_crm.common.exception.EntityDoesNotExistException;
 import com.example.gym_crm.trainee.Trainee;
-import com.example.gym_crm.trainee.TraineeRepository;
+import com.example.gym_crm.trainee.repository.TraineeRepository;
 import com.example.gym_crm.trainer.Trainer;
-import com.example.gym_crm.trainer.TrainerRepository;
-import com.example.gym_crm.trainer.TrainingDoesNotBelongToTrainerException;
+import com.example.gym_crm.trainer.repository.TrainerRepository;
 import com.example.gym_crm.training.Dto.TrainingCreateDto;
+import com.example.gym_crm.training.repository.TrainingRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
