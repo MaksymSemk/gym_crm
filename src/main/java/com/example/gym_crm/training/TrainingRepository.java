@@ -1,24 +1,26 @@
 package com.example.gym_crm.training;
 
-import com.example.gym_crm.common.id_generator.IdGenerator;
-import com.example.gym_crm.common.repository.AbstractRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Map;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public class TrainingRepository extends AbstractRepository<TrainingId, Training> {
+public interface TrainingRepository extends JpaRepository<Training, UUID> {
 
-    @Autowired
-    @Override
-    public void setStorage(Map<TrainingId, Training> trainingStorage) {
-        super.setStorage(trainingStorage);
-    }
-
-    @Autowired
-    @Override
-    public void setIdGenerator(IdGenerator<TrainingId> trainingIdGenerator) {
-        super.setIdGenerator(trainingIdGenerator);
-    }
+    @Query("SELECT t FROM Training t WHERE t.trainer.user.username = :username " +
+            "AND (:fromDate IS NULL OR t.trainingDate >= :fromDate) " +
+            "AND (:toDate IS NULL OR t.trainingDate <= :toDate) " +
+            "AND (:traineeName IS NULL OR t.trainee.user.username = :traineeName)")
+    List<Training> findTrainerTrainingsByCriteria(
+            @Param("username") String username,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate,
+            @Param("traineeName") String traineeName
+    );
 }

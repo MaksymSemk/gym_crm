@@ -6,16 +6,15 @@ import com.example.gym_crm.trainer.Trainer;
 import com.example.gym_crm.training_type.TrainingType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.Set;
 import java.util.UUID;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -45,7 +44,5 @@ public class Training implements EntityId<UUID> {
     private String trainingName;
 
     @Column(nullable = false)
-    private LocalTime trainingDuration;
+    private Integer trainingDuration;
 }
-
-
