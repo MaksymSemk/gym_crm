@@ -1,4 +1,4 @@
-package com.example.gym_crm.authentification;
+package com.example.gym_crm.authentication;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

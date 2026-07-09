@@ -1,4 +1,4 @@
-package com.example.gym_crm.authentification;
+package com.example.gym_crm.authentication;
 
 import com.example.gym_crm.common.user.UserRepository;
 import lombok.AllArgsConstructor;

@@ -1,6 +1,6 @@
 package com.example.gym_crm.training;
 
-import com.example.gym_crm.authentification.RequiresAuth;
+import com.example.gym_crm.authentication.RequiresAuth;
 import com.example.gym_crm.training.Dto.TrainingCreateDto;
 import com.example.gym_crm.training.Dto.TrainingGetByIdDto;
 import jakarta.validation.Valid;

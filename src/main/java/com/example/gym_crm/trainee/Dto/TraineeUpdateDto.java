@@ -1,8 +1,7 @@
 package com.example.gym_crm.trainee.Dto;
 
-import com.example.gym_crm.authentification.AuthData;
+import com.example.gym_crm.authentication.AuthData;
 import com.example.gym_crm.common.user.PersonalIdentity;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

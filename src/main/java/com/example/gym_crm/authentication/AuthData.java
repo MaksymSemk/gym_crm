@@ -1,10 +1,8 @@
-package com.example.gym_crm.authentification;
+package com.example.gym_crm.authentication;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Objects;
 
 @Data
 @NoArgsConstructor

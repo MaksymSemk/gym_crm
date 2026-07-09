@@ -1,11 +1,11 @@
 package com.example.gym_crm.trainer.Dto;
 
-import com.example.gym_crm.authentification.AuthData;
+import com.example.gym_crm.authentication.AuthData;
 import com.example.gym_crm.common.user.PersonalIdentity;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
+
 import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)

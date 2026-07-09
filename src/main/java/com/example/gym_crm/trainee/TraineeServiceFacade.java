@@ -1,9 +1,8 @@
 package com.example.gym_crm.trainee;
 
-import com.example.gym_crm.authentification.AuthData;
-import com.example.gym_crm.authentification.RequiresAuth;
+import com.example.gym_crm.authentication.AuthData;
+import com.example.gym_crm.authentication.RequiresAuth;
 import com.example.gym_crm.trainee.Dto.*;
-import com.example.gym_crm.trainer.Trainer;
 import com.example.gym_crm.training.Training;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.UUID;
 
 @Component
 @Slf4j

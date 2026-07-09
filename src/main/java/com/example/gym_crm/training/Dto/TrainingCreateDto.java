@@ -1,11 +1,10 @@
 package com.example.gym_crm.training.Dto;
 
-import com.example.gym_crm.authentification.AuthData;
+import com.example.gym_crm.authentication.AuthData;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import java.time.LocalDate;
-import java.util.Objects;
 
 @Getter
 public class TrainingCreateDto extends AuthData {

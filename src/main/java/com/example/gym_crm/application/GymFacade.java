@@ -1,6 +1,6 @@
 package com.example.gym_crm.application;
 
-import com.example.gym_crm.authentification.AuthData;
+import com.example.gym_crm.authentication.AuthData;
 import com.example.gym_crm.trainee.Dto.*;
 import com.example.gym_crm.trainee.Trainee;
 import com.example.gym_crm.trainee.TraineeServiceFacade;
