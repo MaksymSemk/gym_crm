@@ -1,9 +1,13 @@
 package com.example.gym_crm.training_type;
 
 import com.example.gym_crm.common.repository.EntityId;
+import com.example.gym_crm.trainer.Trainer;
+import com.example.gym_crm.training.Training;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -17,6 +21,12 @@ public class TrainingType implements EntityId<Long> {
 
     @Column(nullable = false)
     private String name;
+
+    @OneToMany(mappedBy = "specialization")
+    private List<Trainer> trainers;
+
+    @OneToMany(mappedBy = "training_type")
+    private List<Training> trainings;
 
     @Override
     public Long getId() {
