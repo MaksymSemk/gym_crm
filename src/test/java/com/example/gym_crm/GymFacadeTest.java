@@ -3,14 +3,14 @@ package com.example.gym_crm.application;
 import com.example.gym_crm.authentication.AuthData;
 import com.example.gym_crm.trainee.Dto.*;
 import com.example.gym_crm.trainee.Trainee;
-import com.example.gym_crm.trainee.TraineeServiceFacade;
+import com.example.gym_crm.trainee.TraineeService;
 import com.example.gym_crm.trainer.Dto.*;
 import com.example.gym_crm.trainer.Trainer;
-import com.example.gym_crm.trainer.TrainerServiceFacade;
+import com.example.gym_crm.trainer.TrainerService;
 import com.example.gym_crm.training.Dto.TrainingCreateDto;
 import com.example.gym_crm.training.Dto.TrainingGetByIdDto;
 import com.example.gym_crm.training.Training;
-import com.example.gym_crm.training.TrainingServiceFacade;
+import com.example.gym_crm.training.TrainingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -31,17 +32,17 @@ class GymFacadeTest {
     private GymFacade gymFacade;
 
     @Mock
-    private TraineeServiceFacade traineeServiceFacade;
+    private TraineeService traineeService;
 
     @Mock
-    private TrainerServiceFacade trainerServiceFacade;
+    private TrainerService trainerService;
 
     @Mock
-    private TrainingServiceFacade trainingServiceFacade;
+    private TrainingService trainingService;
 
     @BeforeEach
     void setUp() {
-        gymFacade = new GymFacade(traineeServiceFacade, trainerServiceFacade, trainingServiceFacade);
+        gymFacade = new GymFacade(traineeService, trainerService, trainingService);
     }
 
     @Nested
@@ -49,137 +50,144 @@ class GymFacadeTest {
     class TraineeRoutingTests {
 
         @Test
-        @DisplayName("Should delegate createTrainee to TraineeServiceFacade")
+        @DisplayName("Should delegate createTrainee to TraineeService")
         void createTrainee_DelegatesCorrectly() {
             TraineeCreateDto dto = mock(TraineeCreateDto.class);
             Trainee expected = new Trainee();
-            when(traineeServiceFacade.createTrainee(dto)).thenReturn(expected);
+            when(traineeService.createTrainee(dto)).thenReturn(expected);
 
             Trainee result = gymFacade.createTrainee(dto);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(traineeServiceFacade, times(1)).createTrainee(dto);
+            verify(traineeService, times(1)).createTrainee(dto);
         }
 
         @Test
-        @DisplayName("Should delegate updateTrainee to TraineeServiceFacade")
+        @DisplayName("Should delegate updateTrainee to TraineeService")
         void updateTrainee_DelegatesCorrectly() {
             TraineeUpdateDto dto = mock(TraineeUpdateDto.class);
             Trainee expected = new Trainee();
-            when(traineeServiceFacade.updateTrainee(dto)).thenReturn(expected);
+            when(traineeService.updateTrainee(dto)).thenReturn(expected);
 
             Trainee result = gymFacade.updateTrainee(dto);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(traineeServiceFacade, times(1)).updateTrainee(dto);
+            verify(traineeService, times(1)).updateTrainee(dto);
         }
 
         @Test
-        @DisplayName("Should delegate deleteTrainee to TraineeServiceFacade")
+        @DisplayName("Should delegate deleteTrainee ID parameter extraction to TraineeService")
         void deleteTrainee_DelegatesCorrectly() {
             TraineeDeleteDto dto = mock(TraineeDeleteDto.class);
-            doNothing().when(traineeServiceFacade).deleteTrainee(dto);
+            UUID id = UUID.randomUUID();
+            when(dto.getId()).thenReturn(id);
+            doNothing().when(traineeService).deleteTrainee(id);
 
             gymFacade.deleteTrainee(dto);
 
-            verify(traineeServiceFacade, times(1)).deleteTrainee(dto);
+            verify(traineeService, times(1)).deleteTrainee(id);
         }
 
         @Test
-        @DisplayName("Should delegate getTraineeById to TraineeServiceFacade")
+        @DisplayName("Should delegate getTraineeById ID parameter extraction to TraineeService")
         void getTraineeById_DelegatesCorrectly() {
             TraineeGetByIdDto dto = mock(TraineeGetByIdDto.class);
+            UUID id = UUID.randomUUID();
+            when(dto.getId()).thenReturn(id);
             Trainee expected = new Trainee();
-            when(traineeServiceFacade.getTraineeById(dto)).thenReturn(expected);
+            when(traineeService.getTraineeById(id)).thenReturn(expected);
 
             Trainee result = gymFacade.getTraineeById(dto);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(traineeServiceFacade, times(1)).getTraineeById(dto);
+            verify(traineeService, times(1)).getTraineeById(id);
         }
 
         @Test
-        @DisplayName("Should delegate getTraineeByUsername to TraineeServiceFacade")
+        @DisplayName("Should delegate getTraineeByUsername string parameter extraction to TraineeService")
         void getTraineeByUsername_DelegatesCorrectly() {
             AuthData authData = mock(AuthData.class);
+            when(authData.getUsername()).thenReturn("john.doe");
             Trainee expected = new Trainee();
-            when(traineeServiceFacade.getTraineeByUsername(authData)).thenReturn(expected);
+            when(traineeService.getTraineeByUsername("john.doe")).thenReturn(expected);
 
             Trainee result = gymFacade.getTraineeByUsername(authData);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(traineeServiceFacade, times(1)).getTraineeByUsername(authData);
+            verify(traineeService, times(1)).getTraineeByUsername("john.doe");
         }
 
         @Test
-        @DisplayName("Should delegate changeTraineePassword to TraineeServiceFacade")
+        @DisplayName("Should delegate changeTraineePassword DTO payload directly to TraineeService")
         void changeTraineePassword_DelegatesCorrectly() {
             TraineeChangePasswordDto dto = mock(TraineeChangePasswordDto.class);
             Trainee expected = new Trainee();
-            when(traineeServiceFacade.changePassword(dto)).thenReturn(expected);
+            when(traineeService.changePassword(dto)).thenReturn(expected);
 
             Trainee result = gymFacade.changeTraineePassword(dto);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(traineeServiceFacade, times(1)).changePassword(dto);
+            verify(traineeService, times(1)).changePassword(dto);
         }
 
         @Test
-        @DisplayName("Should delegate updateTraineeStatus to TraineeServiceFacade")
+        @DisplayName("Should delegate updateTraineeStatus username verification parameter directly to TraineeService")
         void updateTraineeStatus_DelegatesCorrectly() {
             AuthData authData = mock(AuthData.class);
+            when(authData.getUsername()).thenReturn("john.doe");
             Trainee expected = new Trainee();
-            when(traineeServiceFacade.updateTraineeStatus(authData)).thenReturn(expected);
+            when(traineeService.updateTraineeStatus("john.doe")).thenReturn(expected);
 
             Trainee result = gymFacade.updateTraineeStatus(authData);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(traineeServiceFacade, times(1)).updateTraineeStatus(authData);
+            verify(traineeService, times(1)).updateTraineeStatus("john.doe");
         }
 
         @Test
-        @DisplayName("Should delegate deleteTraineeByUsername to TraineeServiceFacade")
+        @DisplayName("Should delegate deleteTraineeByUsername string conversion invocation to TraineeService")
         void deleteTraineeByUsername_DelegatesCorrectly() {
             AuthData authData = mock(AuthData.class);
-            doNothing().when(traineeServiceFacade).deleteTraineeByUsername(authData);
+            when(authData.getUsername()).thenReturn("john.doe");
+            doNothing().when(traineeService).deleteTraineeByUsername("john.doe");
 
             gymFacade.deleteTraineeByUsername(authData);
 
-            verify(traineeServiceFacade, times(1)).deleteTraineeByUsername(authData);
+            verify(traineeService, times(1)).deleteTraineeByUsername("john.doe");
         }
 
         @Test
-        @DisplayName("Should delegate updateTraineeTrainers to TraineeServiceFacade")
+        @DisplayName("Should delegate updateTraineeTrainers assignment DTO directly to TraineeService")
         void updateTraineeTrainers_DelegatesCorrectly() {
             TraineeUpdateTrainersDto dto = mock(TraineeUpdateTrainersDto.class);
             Trainee expected = new Trainee();
-            when(traineeServiceFacade.updateTraineeTrainers(dto)).thenReturn(expected);
+            when(traineeService.updateTraineeTrainers(dto)).thenReturn(expected);
 
             Trainee result = gymFacade.updateTraineeTrainers(dto);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(traineeServiceFacade, times(1)).updateTraineeTrainers(dto);
+            verify(traineeService, times(1)).updateTraineeTrainers(dto);
         }
 
         @Test
-        @DisplayName("Should delegate getTraineeTrainings to TraineeServiceFacade")
+        @DisplayName("Should delegate getTraineeTrainings criteria filter search payload directly to TraineeService")
         void getTraineeTrainings_DelegatesCorrectly() {
             TraineeTrainingsSearchDto dto = mock(TraineeTrainingsSearchDto.class);
             List<Training> expected = List.of(new Training());
-            when(traineeServiceFacade.getTraineeTrainings(dto)).thenReturn(expected);
+            when(traineeService.getTraineeTrainings(dto)).thenReturn(expected);
 
             List<Training> result = gymFacade.getTraineeTrainings(dto);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(traineeServiceFacade, times(1)).getTraineeTrainings(dto);
+            verify(traineeService, times(1)).getTraineeTrainings(dto);
         }
     }
 
@@ -188,115 +196,120 @@ class GymFacadeTest {
     class TrainerRoutingTests {
 
         @Test
-        @DisplayName("Should delegate createTrainer to TrainerServiceFacade")
+        @DisplayName("Should delegate createTrainer setup payload variables to TrainerService")
         void createTrainer_DelegatesCorrectly() {
             TrainerCreateDto dto = mock(TrainerCreateDto.class);
             Trainer expected = new Trainer();
-            when(trainerServiceFacade.createTrainer(dto)).thenReturn(expected);
+            when(trainerService.createTrainer(dto)).thenReturn(expected);
 
             Trainer result = gymFacade.createTrainer(dto);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(trainerServiceFacade, times(1)).createTrainer(dto);
+            verify(trainerService, times(1)).createTrainer(dto);
         }
 
         @Test
-        @DisplayName("Should delegate updateTrainer to TrainerServiceFacade")
+        @DisplayName("Should delegate updateTrainer verification structures to TrainerService")
         void updateTrainer_DelegatesCorrectly() {
             TrainerUpdateDto dto = mock(TrainerUpdateDto.class);
             Trainer expected = new Trainer();
-            when(trainerServiceFacade.updateTrainer(dto)).thenReturn(expected);
+            when(trainerService.updateTrainer(dto)).thenReturn(expected);
 
             Trainer result = gymFacade.updateTrainer(dto);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(trainerServiceFacade, times(1)).updateTrainer(dto);
+            verify(trainerService, times(1)).updateTrainer(dto);
         }
 
         @Test
-        @DisplayName("Should delegate getTrainerById to TrainerServiceFacade")
+        @DisplayName("Should delegate getTrainerById extraction key variable to TrainerService")
         void getTrainerById_DelegatesCorrectly() {
             TrainerGetByIdDto dto = mock(TrainerGetByIdDto.class);
+            UUID id = UUID.randomUUID();
+            when(dto.getId()).thenReturn(id);
             Trainer expected = new Trainer();
-            when(trainerServiceFacade.getTrainerByID(dto)).thenReturn(expected);
+            when(trainerService.getTrainerByID(id)).thenReturn(expected);
 
             Trainer result = gymFacade.getTrainerById(dto);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(trainerServiceFacade, times(1)).getTrainerByID(dto);
+            verify(trainerService, times(1)).getTrainerByID(id);
         }
 
         @Test
-        @DisplayName("Should delegate getTrainerByUsername to TrainerServiceFacade")
+        @DisplayName("Should delegate getTrainerByUsername string transformation parameters to TrainerService")
         void getTrainerByUsername_DelegatesCorrectly() {
             AuthData authData = mock(AuthData.class);
+            when(authData.getUsername()).thenReturn("trainer.smith");
             Trainer expected = new Trainer();
-            when(trainerServiceFacade.getTrainerByUsername(authData)).thenReturn(expected);
+            when(trainerService.getTrainerByUsername("trainer.smith")).thenReturn(expected);
 
             Trainer result = gymFacade.getTrainerByUsername(authData);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(trainerServiceFacade, times(1)).getTrainerByUsername(authData);
+            verify(trainerService, times(1)).getTrainerByUsername("trainer.smith");
         }
 
         @Test
-        @DisplayName("Should delegate changeTrainerPassword to TrainerServiceFacade")
+        @DisplayName("Should delegate changeTrainerPassword parameters tracking directly onto TrainerService")
         void changeTrainerPassword_DelegatesCorrectly() {
             TrainerChangePasswordDto dto = mock(TrainerChangePasswordDto.class);
             Trainer expected = new Trainer();
-            when(trainerServiceFacade.changePassword(dto)).thenReturn(expected);
+            when(trainerService.changePassword(dto)).thenReturn(expected);
 
             Trainer result = gymFacade.changeTrainerPassword(dto);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(trainerServiceFacade, times(1)).changePassword(dto);
+            verify(trainerService, times(1)).changePassword(dto);
         }
 
         @Test
-        @DisplayName("Should delegate updateTrainerStatus to TrainerServiceFacade")
+        @DisplayName("Should delegate updateTrainerStatus string lookup value parameters down to TrainerService")
         void updateTrainerStatus_DelegatesCorrectly() {
             AuthData authData = mock(AuthData.class);
+            when(authData.getUsername()).thenReturn("trainer.smith");
             Trainer expected = new Trainer();
-            when(trainerServiceFacade.updateTrainerStatus(authData)).thenReturn(expected);
+            when(trainerService.updateTrainerStatus("trainer.smith")).thenReturn(expected);
 
             Trainer result = gymFacade.updateTrainerStatus(authData);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(trainerServiceFacade, times(1)).updateTrainerStatus(authData);
+            verify(trainerService, times(1)).updateTrainerStatus("trainer.smith");
         }
 
         @Test
-        @DisplayName("Should delegate getTrainerTrainings to TrainerServiceFacade")
+        @DisplayName("Should delegate getTrainerTrainings criteria lookup filtering data down to TrainerService")
         void getTrainerTrainings_DelegatesCorrectly() {
             TrainerTrainingsSearchDto dto = mock(TrainerTrainingsSearchDto.class);
             List<Training> expected = List.of(new Training());
-            when(trainerServiceFacade.getTrainerTrainings(dto)).thenReturn(expected);
+            when(trainerService.getTrainerTrainings(dto)).thenReturn(expected);
 
             List<Training> result = gymFacade.getTrainerTrainings(dto);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(trainerServiceFacade, times(1)).getTrainerTrainings(dto);
+            verify(trainerService, times(1)).getTrainerTrainings(dto);
         }
 
         @Test
-        @DisplayName("Should delegate getUnassignedTrainers to TrainerServiceFacade")
+        @DisplayName("Should delegate getUnassignedTrainers username context querying filters down to TrainerService")
         void getUnassignedTrainers_DelegatesCorrectly() {
             GetUnassignedTrainersDto dto = mock(GetUnassignedTrainersDto.class);
+            when(dto.getTraineeUsername()).thenReturn("trainee.john");
             List<Trainer> expected = List.of(new Trainer());
-            when(trainerServiceFacade.getUnassignedTrainers(dto)).thenReturn(expected);
+            when(trainerService.getUnassignedTrainersByTraineeUsername("trainee.john")).thenReturn(expected);
 
             List<Trainer> result = gymFacade.getUnassignedTrainers(dto);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(trainerServiceFacade, times(1)).getUnassignedTrainers(dto);
+            verify(trainerService, times(1)).getUnassignedTrainersByTraineeUsername("trainee.john");
         }
     }
 
@@ -305,31 +318,33 @@ class GymFacadeTest {
     class TrainingRoutingTests {
 
         @Test
-        @DisplayName("Should delegate createTraining to TrainingServiceFacade")
+        @DisplayName("Should delegate createTraining structural logic validation parameter targets onto TrainingService")
         void createTraining_DelegatesCorrectly() {
             TrainingCreateDto dto = mock(TrainingCreateDto.class);
             Training expected = new Training();
-            when(trainingServiceFacade.addTraining(dto)).thenReturn(expected);
+            when(trainingService.createTraining(dto)).thenReturn(expected);
 
             Training result = gymFacade.createTraining(dto);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(trainingServiceFacade, times(1)).addTraining(dto);
+            verify(trainingService, times(1)).createTraining(dto);
         }
 
         @Test
-        @DisplayName("Should delegate getTraining to TrainingServiceFacade")
+        @DisplayName("Should delegate getTraining matching verification key elements down into TrainingService")
         void getTraining_DelegatesCorrectly() {
             TrainingGetByIdDto dto = mock(TrainingGetByIdDto.class);
+            UUID id = UUID.randomUUID();
+            when(dto.getId()).thenReturn(id);
             Training expected = new Training();
-            when(trainingServiceFacade.getTraining(dto)).thenReturn(expected);
+            when(trainingService.getTraining(id)).thenReturn(expected);
 
             Training result = gymFacade.getTraining(dto);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(trainingServiceFacade, times(1)).getTraining(dto);
+            verify(trainingService, times(1)).getTraining(id);
         }
     }
 }

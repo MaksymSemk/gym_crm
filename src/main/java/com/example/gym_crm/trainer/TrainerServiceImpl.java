@@ -5,7 +5,9 @@ import com.example.gym_crm.common.user.User;
 import com.example.gym_crm.common.user.UserRepository;
 import com.example.gym_crm.common.user.UserUtils;
 import com.example.gym_crm.trainee.TraineeRepository;
+import com.example.gym_crm.trainer.Dto.TrainerChangePasswordDto;
 import com.example.gym_crm.trainer.Dto.TrainerCreateDto;
+import com.example.gym_crm.trainer.Dto.TrainerTrainingsSearchDto;
 import com.example.gym_crm.trainer.Dto.TrainerUpdateDto;
 import com.example.gym_crm.training.Training;
 import com.example.gym_crm.training.TrainingRepository;
@@ -27,7 +29,6 @@ public class TrainerServiceImpl implements TrainerService {
 
     private TrainerRepository trainerRepository;
     private UserRepository userRepository;
-    private TraineeRepository traineeRepository;
     private TrainingRepository trainingRepository;
     private TrainingTypeRepository trainingTypeRepository;
     private UserUtils userUtils;
@@ -36,8 +37,6 @@ public class TrainerServiceImpl implements TrainerService {
     public void setTrainerRepository(TrainerRepository trainerRepository) { this.trainerRepository = trainerRepository; }
     @Autowired
     public void setUserRepository(UserRepository userRepository) { this.userRepository = userRepository; }
-    @Autowired
-    public void setTraineeRepository(TraineeRepository traineeRepository) { this.traineeRepository = traineeRepository; }
     @Autowired
     public void setTrainingRepository(TrainingRepository trainingRepository) { this.trainingRepository = trainingRepository; }
     @Autowired
@@ -121,14 +120,14 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Transactional
     @Override
-    public Trainer changePassword(String username, String newPassword) {
-        if (newPassword == null || newPassword.isBlank()) {
+    public Trainer changePassword(TrainerChangePasswordDto dto) {
+        if (dto == null || dto.getNewPassword() == null || dto.getNewPassword().isBlank()) {
             throw new IllegalArgumentException("Password cannot be blank");
         }
-        Trainer trainer = getTrainerByUsername(username);
-        trainer.getUser().setPassword(newPassword);
+        Trainer trainer = getTrainerByUsername(dto.getUsername());
+        trainer.getUser().setPassword(dto.getNewPassword());
         userRepository.save(trainer.getUser());
-        log.warn("Password changed for trainer: {}", username);
+        log.warn("Password changed for trainer: {}", dto.getUsername());
         return trainer;
     }
 
@@ -143,10 +142,14 @@ public class TrainerServiceImpl implements TrainerService {
         return trainer;
     }
 
+    @Transactional
     @Override
-    public List<Training> getTrainerTrainings(String username, LocalDate fromDate, LocalDate toDate, String traineeName) {
-        getTrainerByUsername(username);
-        return trainingRepository.findTrainerTrainingsByCriteria(username, fromDate, toDate, traineeName);
+    public List<Training> getTrainerTrainings(TrainerTrainingsSearchDto dto) {
+        if (dto == null || dto.getUsername() == null) throw new IllegalArgumentException("Missing query payload");
+        getTrainerByUsername(dto.getUsername());
+        return trainingRepository.findTrainerTrainingsByCriteria(
+                dto.getUsername(), dto.getFromDate(), dto.getToDate(), dto.getTraineeName()
+        );
     }
 
     @Override

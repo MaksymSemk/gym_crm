@@ -4,8 +4,7 @@ import com.example.gym_crm.common.exception.EntityDoesNotExistException;
 import com.example.gym_crm.common.user.User;
 import com.example.gym_crm.common.user.UserRepository;
 import com.example.gym_crm.common.user.UserUtils;
-import com.example.gym_crm.trainee.Dto.TraineeCreateDto;
-import com.example.gym_crm.trainee.Dto.TraineeUpdateDto;
+import com.example.gym_crm.trainee.Dto.*;
 import com.example.gym_crm.trainer.Trainer;
 import com.example.gym_crm.trainer.TrainerRepository;
 import com.example.gym_crm.trainer.TrainingDoesNotBelongToTrainerException;
@@ -203,18 +202,14 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Transactional
     @Override
-    public Trainee changePassword(String username, String newPassword) {
-        if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("Username cannot be null or empty");
+    public Trainee changePassword(TraineeChangePasswordDto dto) {
+        if (dto == null || dto.getNewPassword() == null || dto.getNewPassword().isBlank()) {
+            throw new IllegalArgumentException("Invalid password update data");
         }
-        if (newPassword == null || newPassword.isBlank()) {
-            throw new IllegalArgumentException("New password cannot be null or empty");
-        }
-
-        log.debug("Changing password for trainee with username: {}", username);
-        Trainee trainee = getTraineeByUsername(username);
+        Trainee trainee = getTraineeByUsername(dto.getUsername());
+        log.debug("Changing password for trainee with username: {}", dto.getUsername());
         User user = trainee.getUser();
-        user.setPassword(newPassword);
+        user.setPassword(dto.getNewPassword());
         userRepository.save(user);
         return trainee;
     }
@@ -247,7 +242,7 @@ public class TraineeServiceImpl implements TraineeService {
         Trainee trainee = getTraineeByUsername(username);
         UUID traineeId = trainee.getId();
         User user = trainee.getUser();
-        
+
         traineeRepository.deleteById(traineeId);
         if (user != null) {
             userRepository.deleteById(user.getId());
@@ -257,32 +252,29 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Transactional
     @Override
-    public Trainee updateTraineeTrainers(String username, List<UUID> trainerIds) {
-        if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("Username cannot be null or empty");
+    public Trainee updateTraineeTrainers(TraineeUpdateTrainersDto dto) {
+        if (dto == null || dto.getUsername() == null || dto.getTrainerIds() == null) {
+            throw new IllegalArgumentException("Invalid trainers re-assignment payload data");
         }
-
-        var trainers = trainerIds.stream().map(traineeId -> trainerRepository.findById(traineeId).orElseThrow(
-                ()-> new EntityDoesNotExistException("There is no trainer with id " + traineeId)
+        var trainers = dto.getTrainerIds().stream().map(trainerId -> trainerRepository.findById(trainerId).orElseThrow(
+                () -> new EntityDoesNotExistException("There is no trainer with id " + trainerId)
         )).toList();
 
-        log.debug("Updating trainers list for trainee with username: {}", username);
-        Trainee trainee = getTraineeByUsername(username);
+        log.debug("Updating trainers list for trainee with username: {}", dto.getUsername());
+        Trainee trainee = getTraineeByUsername(dto.getUsername());
         trainee.setTrainers(trainers);
         Trainee updatedTrainee = traineeRepository.save(trainee);
-        log.debug("Updated trainee {} with {} trainers", username, trainers.size());
+        log.debug("Updated trainee {} with {} trainers", dto.getUsername(), trainers.size());
         return updatedTrainee;
     }
 
     @Transactional
     @Override
-    public List<Training> getTraineeTrainings(String username, LocalDate fromDate, LocalDate toDate, String trainerName, String trainingType) {
-        if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("Trainee username cannot be empty");
-        }
-        getTraineeByUsername(username);
-
-        log.debug("Retrieving trainings for trainee {} with filters - fromDate: {}, toDate: {}, trainerName: {}, trainingType: {}", username, fromDate, toDate, trainerName, trainingType);
-        return trainingRepository.findTraineeTrainingsByCriteria(username, fromDate, toDate, trainerName, trainingType);
+    public List<Training> getTraineeTrainings(TraineeTrainingsSearchDto dto) {
+        if (dto == null || dto.getUsername() == null) throw new IllegalArgumentException("Invalid filters context");
+        getTraineeByUsername(dto.getUsername());
+        return trainingRepository.findTraineeTrainingsByCriteria(
+                dto.getUsername(), dto.getFromDate(), dto.getToDate(), dto.getTrainerName(), dto.getTrainingType()
+        );
     }
 }

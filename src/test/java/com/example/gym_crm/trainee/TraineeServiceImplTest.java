@@ -4,8 +4,7 @@ import com.example.gym_crm.common.exception.EntityDoesNotExistException;
 import com.example.gym_crm.common.user.User;
 import com.example.gym_crm.common.user.UserRepository;
 import com.example.gym_crm.common.user.UserUtils;
-import com.example.gym_crm.trainee.Dto.TraineeCreateDto;
-import com.example.gym_crm.trainee.Dto.TraineeUpdateDto;
+import com.example.gym_crm.trainee.Dto.*;
 import com.example.gym_crm.trainer.Trainer;
 import com.example.gym_crm.trainer.TrainerRepository;
 import com.example.gym_crm.trainer.TrainingDoesNotBelongToTrainerException;
@@ -192,7 +191,8 @@ class TraineeServiceImplTest {
         void changePassword_Success() {
             when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.of(sampleTrainee));
 
-            Trainee result = traineeService.changePassword("John.Doe", "newSecurePassword");
+            TraineeChangePasswordDto dto = new TraineeChangePasswordDto("John.Doe", "password", "newSecurePassword");
+            Trainee result = traineeService.changePassword(dto);
 
             assertEquals("newSecurePassword", result.getUser().getPassword());
             verify(userRepository, times(1)).save(sampleUser);
@@ -210,13 +210,16 @@ class TraineeServiceImplTest {
         }
 
         @Test
-        @DisplayName("Should correctly delegate criteria search parameters to structural underlying training repositories")
+        @DisplayName("Should correctly delegate criteria search parameters DTO to underlying training repositories")
         void getTraineeTrainings_Success() {
+            TraineeTrainingsSearchDto dto = new TraineeTrainingsSearchDto();
+            dto.setUsername("John.Doe");
+
             when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.of(sampleTrainee));
             when(trainingRepository.findTraineeTrainingsByCriteria(eq("John.Doe"), any(), any(), any(), any()))
                     .thenReturn(List.of(new Training()));
 
-            List<Training> results = traineeService.getTraineeTrainings("John.Doe", null, null, null, null);
+            List<Training> results = traineeService.getTraineeTrainings(dto);
 
             assertNotNull(results);
             assertFalse(results.isEmpty());
@@ -247,18 +250,21 @@ class TraineeServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should cleanly replace trainee coach tracking associations when given valid trainer list IDs")
+    @DisplayName("Should cleanly replace trainee coach tracking associations when given valid trainer re-assignment DTO")
     void updateTraineeTrainers_Success() {
         UUID trainerUUID = UUID.randomUUID();
-        List<UUID> trainerIds = List.of(trainerUUID);
         Trainer mockTrainer = new Trainer();
         mockTrainer.setId(trainerUUID);
+
+        TraineeUpdateTrainersDto dto = new TraineeUpdateTrainersDto();
+        dto.setUsername("John.Doe");
+        dto.setTrainerIds(List.of(trainerUUID));
 
         when(trainerRepository.findById(trainerUUID)).thenReturn(Optional.of(mockTrainer));
         when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.of(sampleTrainee));
         when(traineeRepository.save(any(Trainee.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Trainee result = traineeService.updateTraineeTrainers("John.Doe", trainerIds);
+        Trainee result = traineeService.updateTraineeTrainers(dto);
 
         assertNotNull(result);
         assertEquals(1, result.getTrainers().size());

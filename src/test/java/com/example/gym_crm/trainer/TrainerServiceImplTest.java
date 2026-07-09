@@ -4,7 +4,9 @@ import com.example.gym_crm.common.exception.EntityDoesNotExistException;
 import com.example.gym_crm.common.user.User;
 import com.example.gym_crm.common.user.UserRepository;
 import com.example.gym_crm.common.user.UserUtils;
+import com.example.gym_crm.trainer.Dto.TrainerChangePasswordDto;
 import com.example.gym_crm.trainer.Dto.TrainerCreateDto;
+import com.example.gym_crm.trainer.Dto.TrainerTrainingsSearchDto;
 import com.example.gym_crm.trainer.Dto.TrainerUpdateDto;
 import com.example.gym_crm.training.Training;
 import com.example.gym_crm.training.TrainingRepository;
@@ -182,14 +184,20 @@ class TrainerServiceImplTest {
         }
 
         @Test
-        @DisplayName("Should modify password field variables safely inside user context objects")
+        @DisplayName("Should modify password field variables safely inside user context objects via DTO payload parameters")
         void changePassword_Success() {
+            TrainerChangePasswordDto dto = new TrainerChangePasswordDto();
+            dto.setUsername("Alex.Turner");
+            dto.setPassword("trainerPass");
+            dto.setNewPassword("newSecurePass");
+
             when(trainerRepository.findByUserUsername("Alex.Turner")).thenReturn(Optional.of(sampleTrainer));
             when(userRepository.save(any(User.class))).thenReturn(sampleUser);
 
-            Trainer result = trainerService.changePassword("Alex.Turner", "newSecurePass");
+            Trainer result = trainerService.changePassword(dto);
 
             assertEquals("newSecurePass", result.getUser().getPassword());
+            verify(userRepository, times(1)).save(sampleUser);
         }
 
         @Test
@@ -209,17 +217,25 @@ class TrainerServiceImplTest {
     class SearchTests {
 
         @Test
-        @DisplayName("Should delegate filter criteria arguments securely over to core training search engines")
+        @DisplayName("Should delegate filter criteria DTO arguments securely over to core training search engines")
         void getTrainerTrainings_Success() {
             LocalDate now = LocalDate.now();
+            TrainerTrainingsSearchDto dto = new TrainerTrainingsSearchDto();
+            dto.setUsername("Alex.Turner");
+            dto.setFromDate(now);
+            dto.setToDate(now);
+            dto.setTraineeName("John.Doe");
+
             when(trainerRepository.findByUserUsername("Alex.Turner")).thenReturn(Optional.of(sampleTrainer));
             when(trainingRepository.findTrainerTrainingsByCriteria("Alex.Turner", now, now, "John.Doe"))
                     .thenReturn(List.of(new Training()));
 
-            List<Training> results = trainerService.getTrainerTrainings("Alex.Turner", now, now, "John.Doe");
+            List<Training> results = trainerService.getTrainerTrainings(dto);
 
             assertNotNull(results);
             assertEquals(1, results.size());
+            verify(trainingRepository, times(1))
+                    .findTrainerTrainingsByCriteria("Alex.Turner", now, now, "John.Doe");
         }
     }
 }

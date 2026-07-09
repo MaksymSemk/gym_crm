@@ -1,7 +1,6 @@
 package com.example.gym_crm.trainee;
 
-import com.example.gym_crm.trainee.Dto.TraineeCreateDto;
-import com.example.gym_crm.trainee.Dto.TraineeUpdateDto;
+import com.example.gym_crm.trainee.Dto.*;
 import com.example.gym_crm.trainer.Trainer;
 import com.example.gym_crm.training.Training;
 
@@ -10,24 +9,14 @@ import java.util.List;
 import java.util.UUID;
 
 public interface TraineeService {
-
     Trainee createTrainee(TraineeCreateDto trainee);
-    
     Trainee updateTrainee(TraineeUpdateDto trainee);
-    
     void deleteTrainee(UUID id);
-    
     Trainee getTraineeById(UUID id);
-    
     Trainee getTraineeByUsername(String username);
-    
-    Trainee changePassword(String username, String newPassword);
-    
+    Trainee changePassword(TraineeChangePasswordDto dto);
     Trainee updateTraineeStatus(String username);
-    
     void deleteTraineeByUsername(String username);
-    
-    Trainee updateTraineeTrainers(String username, List<UUID> trainers);
-
-    List<Training> getTraineeTrainings(String username, LocalDate fromDate, LocalDate toDate, String trainerName, String trainingType);
+    Trainee updateTraineeTrainers(TraineeUpdateTrainersDto dto);
+    List<Training> getTraineeTrainings(TraineeTrainingsSearchDto dto);
 }

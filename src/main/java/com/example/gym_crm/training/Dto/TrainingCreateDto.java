@@ -3,10 +3,13 @@ package com.example.gym_crm.training.Dto;
 import com.example.gym_crm.authentication.AuthData;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import java.time.LocalDate;
 
-@Getter
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class TrainingCreateDto extends AuthData {
     @NotBlank(message = "Trainee username is required")
     private String traineeUsername;
