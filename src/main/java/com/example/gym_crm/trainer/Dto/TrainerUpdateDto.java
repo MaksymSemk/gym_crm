@@ -1,28 +1,24 @@
 package com.example.gym_crm.trainer.Dto;
 
+import com.example.gym_crm.authentification.AuthData;
 import com.example.gym_crm.common.user.PersonalIdentity;
-import com.example.gym_crm.training.TrainingId;
-import com.example.gym_crm.training_type.TrainingType;
-
-import java.util.Set;
+import lombok.Getter;
 import java.util.UUID;
 
-public record TrainerUpdateDto(
-        UUID userId,
-        String firstName,
-        String lastName,
-        Boolean isActive,
-        Set<TrainingType> specialization,
-        Set<TrainingId> trainingIds
-) implements PersonalIdentity
-{
-    @Override
-    public String getFirstName() {
-        return firstName;
-    }
+@Getter
+public class TrainerUpdateDto extends AuthData implements PersonalIdentity {
+    private final UUID userId;
+    private final String firstName;
+    private final String lastName;
+    private final Boolean isActive;
+    private final Long specializationId;
 
-    @Override
-    public String getLastName() {
-        return lastName;
+    public TrainerUpdateDto(String username, String password, UUID userId, String firstName, String lastName, Boolean isActive, Long specializationId) {
+        super(username, password);
+        this.userId = userId;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.isActive = isActive;
+        this.specializationId = specializationId;
     }
 }

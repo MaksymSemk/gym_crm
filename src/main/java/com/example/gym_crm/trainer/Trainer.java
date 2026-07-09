@@ -6,6 +6,8 @@ import com.example.gym_crm.trainee.Trainee;
 import com.example.gym_crm.training.Training;
 import com.example.gym_crm.training_type.TrainingType;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +16,8 @@ import java.util.UUID;
 
 @Data
 @NoArgsConstructor
+@Builder
+@AllArgsConstructor
 @Entity
 @Table(name = "trainers")
 public class Trainer implements EntityId<UUID> {

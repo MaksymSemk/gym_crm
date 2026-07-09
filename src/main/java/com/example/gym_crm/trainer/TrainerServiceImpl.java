@@ -1,148 +1,157 @@
 package com.example.gym_crm.trainer;
 
 import com.example.gym_crm.common.exception.EntityDoesNotExistException;
+import com.example.gym_crm.common.user.User;
+import com.example.gym_crm.common.user.UserRepository;
 import com.example.gym_crm.common.user.UserUtils;
+import com.example.gym_crm.trainee.TraineeRepository;
 import com.example.gym_crm.trainer.Dto.TrainerCreateDto;
 import com.example.gym_crm.trainer.Dto.TrainerUpdateDto;
 import com.example.gym_crm.training.Training;
-import com.example.gym_crm.training.TrainingId;
 import com.example.gym_crm.training.TrainingRepository;
 import com.example.gym_crm.training_type.TrainingType;
 import com.example.gym_crm.training_type.TrainingTypeRepository;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
-@Slf4j
 @Service
+@Slf4j
 public class TrainerServiceImpl implements TrainerService {
 
     private TrainerRepository trainerRepository;
-
-    private UserUtils userUtils;
-    private TrainingTypeRepository trainingTypeRepository;
-
+    private UserRepository userRepository;
+    private TraineeRepository traineeRepository;
     private TrainingRepository trainingRepository;
+    private TrainingTypeRepository trainingTypeRepository;
+    private UserUtils userUtils;
 
     @Autowired
-    public void setUserUtils(UserUtils userUtils) {
-        this.userUtils = userUtils;
-    }
-
+    public void setTrainerRepository(TrainerRepository trainerRepository) { this.trainerRepository = trainerRepository; }
     @Autowired
-    public void setTrainerRepository(TrainerRepository trainerRepository) {
-        this.trainerRepository = trainerRepository;
-    }
-
+    public void setUserRepository(UserRepository userRepository) { this.userRepository = userRepository; }
     @Autowired
-    public void setTrainingRepository(TrainingRepository trainingRepository) {
-        this.trainingRepository = trainingRepository;
-    }
-
+    public void setTraineeRepository(TraineeRepository traineeRepository) { this.traineeRepository = traineeRepository; }
     @Autowired
-    public void setTrainingTypeRepository(TrainingTypeRepository trainingTypeRepository) {
-        this.trainingTypeRepository = trainingTypeRepository;
-    }
+    public void setTrainingRepository(TrainingRepository trainingRepository) { this.trainingRepository = trainingRepository; }
+    @Autowired
+    public void setTrainingTypeRepository(TrainingTypeRepository trainingTypeRepository) { this.trainingTypeRepository = trainingTypeRepository; }
+    @Autowired
+    public void setUserUtils(UserUtils userUtils) { this.userUtils = userUtils; }
 
+    @Transactional
     @Override
-    public Trainer getTrainerByID(UUID uuid) {
-        log.debug("Fetching trainer with ID: {}", uuid);
-        return trainerRepository.findById(uuid).orElseThrow(
-                ()-> new EntityDoesNotExistException("There is no trainer with id " + uuid)
-        );
-    }
-
-    @Override
-    public Trainer createTrainer(TrainerCreateDto trainerCreateDto) {
-        if (trainerCreateDto == null) {
+    public Trainer createTrainer(TrainerCreateDto dto) {
+        if (dto == null) {
             throw new IllegalArgumentException("Trainer create DTO cannot be null");
         }
 
-        log.debug("Creating trainer with first name: {} and last name: {}", trainerCreateDto.firstName(), trainerCreateDto.lastName());
+        log.debug("Creating trainer profile: {} {}", dto.firstName(), dto.lastName());
 
-        if (trainerCreateDto.specialization() == null || trainerCreateDto.specialization().isEmpty()) {
-            throw new IllegalArgumentException("Trainer must have at least one specialization (training type)");
-        }
+        TrainingType specialization = trainingTypeRepository.findById(dto.specialization().getId())
+                .orElseThrow(() -> new EntityDoesNotExistException("Specialization training type not found"));
 
-        if (!isAllSpecializationsExist(trainerCreateDto.specialization())){
-            throw new EntityDoesNotExistException("One or more specializations do not exist");
-        }
+        String username = userUtils.createUsername(dto.firstName(), dto.lastName());
+        String password = userUtils.generatePassword();
 
-        String username = userUtils.createUsername(trainerCreateDto.firstName(),  trainerCreateDto.lastName());
-        String password= userUtils.generatePassword();
+        User newUser = User.builder()
+                .firstName(dto.firstName())
+                .lastName(dto.lastName())
+                .username(username)
+                .password(password)
+                .isActive(dto.isActive())
+                .build();
 
-        Trainer newTrainer = new Trainer(
-                trainerCreateDto.firstName(),
-                trainerCreateDto.lastName(),
-                username,
-                password,
-                trainerCreateDto.isActive(),
-                trainerCreateDto.specialization()
-        );
+        Trainer newTrainer = Trainer.builder()
+                .specialization(specialization)
+                .user(newUser)
+                .trainings(new ArrayList<>())
+                .trainees(new ArrayList<>())
+                .build();
 
-        return trainerRepository.create(newTrainer);
+        return trainerRepository.save(newTrainer);
     }
 
     @Override
-    public Trainer updateTrainer(TrainerUpdateDto trainerUpdateDto) {
-        log.debug("Updating trainer with ID: {}", trainerUpdateDto.userId());
+    public Trainer getTrainerByUsername(String username) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Username cannot be null or empty");
+        }
+        return trainerRepository.findByUserUsername(username)
+                .orElseThrow(() -> new EntityDoesNotExistException("Trainer not found with username: " + username));
+    }
 
-        var trainer = trainerRepository.findById(trainerUpdateDto.userId()).orElseThrow(
-                ()-> new EntityDoesNotExistException("There is no trainer with id " + trainerUpdateDto.userId())
-        );
+    @Transactional
+    @Override
+    public Trainer updateTrainer(TrainerUpdateDto dto) {
+        if (dto == null || dto.getUserId() == null) {
+            throw new IllegalArgumentException("Invalid update parameters");
+        }
 
-        boolean updatedIdentity = trainer.updateIdentity(trainerUpdateDto);
+        log.debug("Updating trainer profile for ID: {}", dto.getUserId());
+        Trainer trainer = trainerRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new EntityDoesNotExistException("Trainer not found"));
+
+        User user = trainer.getUser();
+        boolean updatedIdentity = user.updateIdentity(dto);
         if (updatedIdentity) {
-            trainer.setUsername(userUtils.createUsername(trainer.getFirstName(), trainer.getLastName()));
+            user.setUsername(userUtils.createUsername(user.getFirstName(), user.getLastName()));
         }
 
-        if(trainerUpdateDto.specialization() != null){
-            if (!isAllSpecializationsExist(trainerUpdateDto.specialization())){
-                throw new EntityDoesNotExistException("Specialization does not exist");
-            }
-            trainer.setSpecialization(trainerUpdateDto.specialization());
-        }
-        if(trainerUpdateDto.isActive()!=null){
-            trainer.setIsActive(trainerUpdateDto.isActive());
+        if (dto.getIsActive() != null) {
+            user.setIsActive(dto.getIsActive());
         }
 
-        if(trainerUpdateDto.trainingIds() != null){
-            Set<Training> updatedTrainings = validateTrainings(trainerUpdateDto.trainingIds(), trainer);
-            trainer.setTrainings(updatedTrainings);
+        if (dto.getSpecializationId() != null) {
+            TrainingType specialization = trainingTypeRepository.findById(dto.getSpecializationId())
+                    .orElseThrow(() -> new EntityDoesNotExistException("Specialization not found"));
+            trainer.setSpecialization(specialization);
         }
 
-        Trainer updatedTrainer = trainerRepository.update(trainer);
-        return updatedTrainer;
+        userRepository.save(user);
+        return trainerRepository.save(trainer);
     }
 
-
-
-    private Set<Training> validateTrainings(Set<TrainingId> trainingIds, Trainer trainer) {
-        Set<Training> updatedTrainings = new HashSet<>();
-        for(var trainingId: trainingIds) {
-            var training = trainingRepository.findById(trainingId).orElseThrow(
-                    ()-> new EntityDoesNotExistException("There is no training with id " + trainingId)
-            );
-            if(!trainingId.trainerId().equals(trainer.getUserId())){
-                throw new TrainingDoesNotBelongToTrainerException("Training with id " + trainingId + " does not belong to trainer with id " + trainer.getUserId());
-            }
-
-            updatedTrainings.add(training);
+    @Transactional
+    @Override
+    public Trainer changePassword(String username, String newPassword) {
+        if (newPassword == null || newPassword.isBlank()) {
+            throw new IllegalArgumentException("Password cannot be blank");
         }
-        return updatedTrainings;
+        Trainer trainer = getTrainerByUsername(username);
+        trainer.getUser().setPassword(newPassword);
+        userRepository.save(trainer.getUser());
+        return trainer;
     }
 
-    private boolean isAllSpecializationsExist(Set<TrainingType> specialization) {
-        for (TrainingType trainingType : specialization) {
-            if (!trainingTypeRepository.existsById(trainingType.getId())){
-                return false;
-            }
-        }
-        return true;
+    @Transactional
+    @Override
+    public Trainer updateTrainerStatus(String username) {
+        Trainer trainer = getTrainerByUsername(username);
+        User user = trainer.getUser();
+        user.setIsActive(!user.getIsActive()); // Non-idempotent toggle activation
+        userRepository.save(user);
+        return trainer;
     }
 
+    @Override
+    public List<Training> getTrainerTrainings(String username, LocalDate fromDate, LocalDate toDate, String traineeName) {
+        // Ensure trainer exists first
+        getTrainerByUsername(username);
+        return trainingRepository.findTrainerTrainingsByCriteria(username, fromDate, toDate, traineeName);
+    }
+
+    @Override
+    public List<Trainer> getUnassignedTrainersByTraineeUsername(String traineeUsername) {
+        if (traineeUsername == null || traineeUsername.isBlank()) {
+            throw new IllegalArgumentException("Trainee username cannot be empty");
+        }
+        return trainerRepository.findTrainersNotAssignedToTrainee(traineeUsername);
+    }
 }

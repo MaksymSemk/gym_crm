@@ -10,7 +10,7 @@ public record TrainerCreateDto(
         String firstName,
         String lastName,
         Boolean isActive,
-        Set<TrainingType> specialization
+        TrainingType specialization
 ) {
     public TrainerCreateDto {
         Objects.requireNonNull(firstName, "firstName is required");
