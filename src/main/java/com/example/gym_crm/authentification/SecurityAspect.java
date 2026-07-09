@@ -29,10 +29,10 @@ public class SecurityAspect {
             throw new AuthenticationException("Authentication failed");
         }
 
-        var user =  userRepository.findByUsername(authData.username()).orElseThrow(
+        var user =  userRepository.findByUsername(authData.getUsername()).orElseThrow(
                 ()-> new AuthenticationException("Authentication failed")
         );
-        var password = authData.password();
+        var password = authData.getPassword();
 
         if (!password.equals(user.getPassword())) {
             throw new AuthenticationException("Authentication failed");
