@@ -75,4 +75,16 @@ public class TraineeServiceFacade {
         log.debug("Facade: Updating trainee trainers with authentication");
         return traineeService.updateTraineeTrainers(dto.getUsername(), dto.getTrainers());
     }
+
+    @RequiresAuth
+    public List<Training> getTraineeTrainings(TraineeTrainingsSearchDto dto) {
+        log.debug("Facade: Querying trainee trainings history with authentication");
+        return traineeService.getTraineeTrainings(
+                dto.getUsername(),
+                dto.getFromDate(),
+                dto.getToDate(),
+                dto.getTrainerName(),
+                dto.getTrainingType()
+        );
+    }
 }

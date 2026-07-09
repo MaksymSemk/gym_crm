@@ -264,4 +264,15 @@ public class TraineeServiceImpl implements TraineeService {
         log.debug("Updated trainee {} with {} trainers", username, trainers.size());
         return updatedTrainee;
     }
+
+    @Transactional
+    @Override
+    public List<Training> getTraineeTrainings(String username, LocalDate fromDate, LocalDate toDate, String trainerName, String trainingType) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Trainee username cannot be empty");
+        }
+        getTraineeByUsername(username);
+
+        return trainingRepository.findTraineeTrainingsByCriteria(username, fromDate, toDate, trainerName, trainingType);
+    }
 }

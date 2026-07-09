@@ -23,4 +23,17 @@ public interface TrainingRepository extends JpaRepository<Training, UUID> {
             @Param("toDate") LocalDate toDate,
             @Param("traineeName") String traineeName
     );
+
+    @Query("SELECT t FROM Training t WHERE t.trainee.user.username = :username " +
+            "AND (:fromDate IS NULL OR t.trainingDate >= :fromDate) " +
+            "AND (:toDate IS NULL OR t.trainingDate <= :toDate) " +
+            "AND (:trainerName IS NULL OR t.trainer.user.username = :trainerName) " +
+            "AND (:trainingType IS NULL OR t.trainingType.name = :trainingType)")
+    List<Training> findTraineeTrainingsByCriteria(
+            @Param("username") String username,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate,
+            @Param("trainerName") String trainerName,
+            @Param("trainingType") String trainingType
+    );
 }
