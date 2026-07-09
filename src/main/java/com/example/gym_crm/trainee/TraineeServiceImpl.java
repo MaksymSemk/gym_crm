@@ -7,6 +7,7 @@ import com.example.gym_crm.common.user.UserUtils;
 import com.example.gym_crm.trainee.Dto.TraineeCreateDto;
 import com.example.gym_crm.trainee.Dto.TraineeUpdateDto;
 import com.example.gym_crm.trainer.Trainer;
+import com.example.gym_crm.trainer.TrainerRepository;
 import com.example.gym_crm.trainer.TrainingDoesNotBelongToTrainerException;
 import com.example.gym_crm.training.Training;
 import com.example.gym_crm.training.TrainingRepository;
@@ -31,6 +32,13 @@ public class TraineeServiceImpl implements TraineeService {
     private TrainingRepository trainingRepository;
 
     private UserUtils userUtils;
+
+    private TrainerRepository trainerRepository;
+
+    @Autowired
+    public void setTrainerRepository(TrainerRepository trainerRepository) {
+        this.trainerRepository = trainerRepository;
+    }
 
     @Autowired
     public void setUserUtils(UserUtils userUtils) {
@@ -249,13 +257,14 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Transactional
     @Override
-    public Trainee updateTraineeTrainers(String username, List<Trainer> trainers) {
+    public Trainee updateTraineeTrainers(String username, List<UUID> trainerIds) {
         if (username == null || username.isBlank()) {
             throw new IllegalArgumentException("Username cannot be null or empty");
         }
-        if (trainers == null) {
-            throw new IllegalArgumentException("Trainers list cannot be null");
-        }
+
+        var trainers = trainerIds.stream().map(traineeId -> trainerRepository.findById(traineeId).orElseThrow(
+                ()-> new EntityDoesNotExistException("There is no trainer with id " + traineeId)
+        )).toList();
 
         log.debug("Updating trainers list for trainee with username: {}", username);
         Trainee trainee = getTraineeByUsername(username);
@@ -273,6 +282,7 @@ public class TraineeServiceImpl implements TraineeService {
         }
         getTraineeByUsername(username);
 
+        log.debug("Retrieving trainings for trainee {} with filters - fromDate: {}, toDate: {}, trainerName: {}, trainingType: {}", username, fromDate, toDate, trainerName, trainingType);
         return trainingRepository.findTraineeTrainingsByCriteria(username, fromDate, toDate, trainerName, trainingType);
     }
 }

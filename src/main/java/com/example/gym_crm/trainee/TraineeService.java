@@ -27,7 +27,7 @@ public interface TraineeService {
     
     void deleteTraineeByUsername(String username);
     
-    Trainee updateTraineeTrainers(String username, List<Trainer> trainers);
+    Trainee updateTraineeTrainers(String username, List<UUID> trainers);
 
     List<Training> getTraineeTrainings(String username, LocalDate fromDate, LocalDate toDate, String trainerName, String trainingType);
 }

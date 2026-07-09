@@ -54,7 +54,7 @@ public class TrainerServiceImpl implements TrainerService {
 
         log.debug("Creating trainer profile: {} {}", dto.firstName(), dto.lastName());
 
-        TrainingType specialization = trainingTypeRepository.findById(dto.specialization().getId())
+        TrainingType specialization = trainingTypeRepository.findById(dto.specializationId())
                 .orElseThrow(() -> new EntityDoesNotExistException("Specialization training type not found"));
 
         String username = userUtils.createUsername(dto.firstName(), dto.lastName());
@@ -83,6 +83,7 @@ public class TrainerServiceImpl implements TrainerService {
         if (username == null || username.isBlank()) {
             throw new IllegalArgumentException("Username cannot be null or empty");
         }
+        log.debug("Retrieving trainer by username: {}", username);
         return trainerRepository.findByUserUsername(username)
                 .orElseThrow(() -> new EntityDoesNotExistException("Trainer not found with username: " + username));
     }
@@ -127,6 +128,7 @@ public class TrainerServiceImpl implements TrainerService {
         Trainer trainer = getTrainerByUsername(username);
         trainer.getUser().setPassword(newPassword);
         userRepository.save(trainer.getUser());
+        log.warn("Password changed for trainer: {}", username);
         return trainer;
     }
 
@@ -135,14 +137,14 @@ public class TrainerServiceImpl implements TrainerService {
     public Trainer updateTrainerStatus(String username) {
         Trainer trainer = getTrainerByUsername(username);
         User user = trainer.getUser();
-        user.setIsActive(!user.getIsActive()); // Non-idempotent toggle activation
+        user.setIsActive(!user.getIsActive());
         userRepository.save(user);
+        log.debug("Trainer status updated for: {}", username);
         return trainer;
     }
 
     @Override
     public List<Training> getTrainerTrainings(String username, LocalDate fromDate, LocalDate toDate, String traineeName) {
-        // Ensure trainer exists first
         getTrainerByUsername(username);
         return trainingRepository.findTrainerTrainingsByCriteria(username, fromDate, toDate, traineeName);
     }
@@ -153,5 +155,15 @@ public class TrainerServiceImpl implements TrainerService {
             throw new IllegalArgumentException("Trainee username cannot be empty");
         }
         return trainerRepository.findTrainersNotAssignedToTrainee(traineeUsername);
+    }
+
+    @Override
+    public Trainer getTrainerByID(UUID uuid) {
+        if (uuid == null) {
+            throw new IllegalArgumentException("Trainer id cannot be null");
+        }
+        log.debug("Retrieving trainer with ID: {}", uuid);
+        return trainerRepository.findById(uuid)
+                .orElseThrow(() -> new EntityDoesNotExistException("Trainer not found with id: " + uuid));
     }
 }

@@ -74,7 +74,7 @@ public class TraineeServiceFacade {
     @RequiresAuth
     public Trainee updateTraineeTrainers(@Valid TraineeUpdateTrainersDto dto) {
         log.debug("Facade: Updating trainee trainers with authentication");
-        return traineeService.updateTraineeTrainers(dto.getUsername(), dto.getTrainers());
+        return traineeService.updateTraineeTrainers(dto.getUsername(), dto.getTrainerIds());
     }
 
     @RequiresAuth

@@ -67,4 +67,10 @@ public class TrainerServiceFacade {
         log.debug("Facade: Querying unassigned trainers list via trainee context");
         return trainerService.getUnassignedTrainersByTraineeUsername(dto.getTraineeUsername());
     }
+
+    @RequiresAuth
+    public Trainer getTrainerByID(@Valid TrainerGetByIdDto dto) {
+        log.debug("Facade: Authenticating and retrieving trainer by ID via service");
+        return trainerService.getTrainerByID(dto.getId());
+    }
 }

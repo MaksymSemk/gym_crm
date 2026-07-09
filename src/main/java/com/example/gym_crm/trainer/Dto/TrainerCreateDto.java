@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 public record TrainerCreateDto(
         @NotBlank(message = "First name is required")
@@ -16,5 +17,5 @@ public record TrainerCreateDto(
         @NotNull(message = "Active status is required")
         Boolean isActive,
         @NotNull(message = "Specialization is required")
-        TrainingType specialization
+        Long specializationId
 ) {}

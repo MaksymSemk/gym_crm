@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Slf4j
 @Service
 public class TrainingServiceImpl implements TrainingService {
@@ -42,10 +44,6 @@ public class TrainingServiceImpl implements TrainingService {
         Trainer trainer = trainerRepository.findByUserUsername(dto.getTrainerUsername())
                 .orElseThrow(() -> new EntityDoesNotExistException("Trainer not found with username: " + dto.getTrainerUsername()));
 
-        if (!dto.getTrainingName().equals(trainer.getSpecialization().getName())) {
-            throw new TrainingDoesNotBelongToTrainerException("Trainer is not specialized to conduct this class type");
-        }
-
         Training newTraining = Training.builder()
                 .trainee(trainee)
                 .trainer(trainer)
@@ -58,5 +56,15 @@ public class TrainingServiceImpl implements TrainingService {
         Training savedTraining = trainingRepository.save(newTraining);
         log.info("Successfully created training session with ID: {}", savedTraining.getId());
         return savedTraining;
+    }
+
+    @Override
+    public Training getTraining(UUID id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Training id cannot be null");
+        }
+        log.debug("Retrieving training session with ID: {}", id);
+        return trainingRepository.findById(id)
+                .orElseThrow(() -> new EntityDoesNotExistException("Training session not found with id: " + id));
     }
 }

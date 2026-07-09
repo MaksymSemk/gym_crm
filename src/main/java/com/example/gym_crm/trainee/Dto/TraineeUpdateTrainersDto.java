@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -18,5 +19,5 @@ import java.util.Objects;
 @EqualsAndHashCode(callSuper = true)
 public class TraineeUpdateTrainersDto extends AuthData {
     @NotEmpty(message = "Trainers list is required")
-    private List<Trainer> trainers;
+    private List<UUID> trainerIds;
 }

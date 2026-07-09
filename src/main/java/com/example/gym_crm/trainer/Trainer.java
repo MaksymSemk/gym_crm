@@ -36,11 +36,6 @@ public class Trainer{
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    @ManyToMany
-    @JoinTable(
-            name = "trainer_trainee",
-            joinColumns = @JoinColumn(name = "trainer_id"),
-            inverseJoinColumns = @JoinColumn(name = "trainee_id")
-    )
+    @ManyToMany(mappedBy = "trainers")
     private List<Trainee> trainees;
 }

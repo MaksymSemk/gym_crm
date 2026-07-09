@@ -22,4 +22,6 @@ public interface TrainerService {
     List<Training> getTrainerTrainings(String username, LocalDate fromDate, LocalDate toDate, String traineeName);
 
     List<Trainer> getUnassignedTrainersByTraineeUsername(String traineeUsername);
+
+    Trainer getTrainerByID(UUID uuid);
 }
