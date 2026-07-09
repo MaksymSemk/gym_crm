@@ -25,7 +25,7 @@ public class TrainingType implements EntityId<Long> {
     @OneToMany(mappedBy = "specialization")
     private List<Trainer> trainers;
 
-    @OneToMany(mappedBy = "training_type")
+    @OneToMany(mappedBy = "trainingType")
     private List<Training> trainings;
 
     @Override
