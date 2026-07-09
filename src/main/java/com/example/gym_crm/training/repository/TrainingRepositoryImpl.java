@@ -6,7 +6,9 @@ import jakarta.persistence.TypedQuery;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Repository
@@ -20,16 +22,25 @@ public class TrainingRepositoryImpl extends AbstractCustomRepository<Training, U
     public List<Training> findTrainerTrainingsByCriteria(
             String username, LocalDate fromDate, LocalDate toDate, String traineeName) {
 
-        String jpql = "SELECT t FROM Training t WHERE t.trainer.user.username = :username " +
-                "AND (:fromDate IS NULL OR t.trainingDate >= :fromDate) " +
-                "AND (:toDate IS NULL OR t.trainingDate <= :toDate) " +
-                "AND (:traineeName IS NULL OR t.trainee.user.username = :traineeName)";
+        StringBuilder jpql = new StringBuilder("SELECT t FROM Training t WHERE t.trainer.user.username = :username");
+        Map<String, Object> params = new HashMap<>();
+        params.put("username", username);
 
-        TypedQuery<Training> query = entityManager.createQuery(jpql, Training.class);
-        query.setParameter("username", username);
-        query.setParameter("fromDate", fromDate);
-        query.setParameter("toDate", toDate);
-        query.setParameter("traineeName", traineeName);
+        if (fromDate != null) {
+            jpql.append(" AND t.trainingDate >= :fromDate");
+            params.put("fromDate", fromDate);
+        }
+        if (toDate != null) {
+            jpql.append(" AND t.trainingDate <= :toDate");
+            params.put("toDate", toDate);
+        }
+        if (traineeName != null && !traineeName.isBlank()) {
+            jpql.append(" AND t.trainee.user.username = :traineeName");
+            params.put("traineeName", traineeName);
+        }
+
+        TypedQuery<Training> query = entityManager.createQuery(jpql.toString(), Training.class);
+        params.forEach(query::setParameter);
 
         return query.getResultList();
     }
@@ -38,18 +49,29 @@ public class TrainingRepositoryImpl extends AbstractCustomRepository<Training, U
     public List<Training> findTraineeTrainingsByCriteria(
             String username, LocalDate fromDate, LocalDate toDate, String trainerName, String trainingType) {
 
-        String jpql = "SELECT t FROM Training t WHERE t.trainee.user.username = :username " +
-                "AND (:fromDate IS NULL OR t.trainingDate >= :fromDate) " +
-                "AND (:toDate IS NULL OR t.trainingDate <= :toDate) " +
-                "AND (:trainerName IS NULL OR t.trainer.user.username = :trainerName) " +
-                "AND (:trainingType IS NULL OR t.trainingType.name = :trainingType)";
+        StringBuilder jpql = new StringBuilder("SELECT t FROM Training t WHERE t.trainee.user.username = :username");
+        Map<String, Object> params = new HashMap<>();
+        params.put("username", username);
 
-        TypedQuery<Training> query = entityManager.createQuery(jpql, Training.class);
-        query.setParameter("username", username);
-        query.setParameter("fromDate", fromDate);
-        query.setParameter("toDate", toDate);
-        query.setParameter("trainerName", trainerName);
-        query.setParameter("trainingType", trainingType);
+        if (fromDate != null) {
+            jpql.append(" AND t.trainingDate >= :fromDate");
+            params.put("fromDate", fromDate);
+        }
+        if (toDate != null) {
+            jpql.append(" AND t.trainingDate <= :toDate");
+            params.put("toDate", toDate);
+        }
+        if (trainerName != null && !trainerName.isBlank()) {
+            jpql.append(" AND t.trainer.user.username = :trainerName");
+            params.put("trainerName", trainerName);
+        }
+        if (trainingType != null && !trainingType.isBlank()) {
+            jpql.append(" AND t.trainingType.name = :trainingType");
+            params.put("trainingType", trainingType);
+        }
+
+        TypedQuery<Training> query = entityManager.createQuery(jpql.toString(), Training.class);
+        params.forEach(query::setParameter);
 
         return query.getResultList();
     }
