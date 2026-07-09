@@ -99,7 +99,7 @@ public class GymFacade {
         return trainerServiceFacade.getUnassignedTrainers(dto);
     }
 
-    // TRAINING ORCHESTRATION
+    // TRAINING
     public Training createTraining(TrainingCreateDto dto) {
         return trainingServiceFacade.addTraining(dto);
     }
