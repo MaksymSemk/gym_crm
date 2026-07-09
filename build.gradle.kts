@@ -27,6 +27,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test:4.1.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa:4.1.0")
+    implementation("org.springframework.boot:spring-boot-starter-aop:4.0.0-M2")
     runtimeOnly("org.postgresql:postgresql:42.7.13")
 }
 

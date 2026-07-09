@@ -11,13 +11,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       TZ: Europe/Kyiv
-    networks:
-      - GYM_CRM
     volumes:
       - gym_crm_data:/var/lib/postgresql/data
-
-networks:
-  GYM_CRM:
 
 volumes:
   gym_crm_data:
