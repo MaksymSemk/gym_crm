@@ -7,6 +7,9 @@ import com.example.gym_crm.common.user.UserUtils;
 import com.example.gym_crm.trainee.Dto.TraineeCreateDto;
 import com.example.gym_crm.trainee.Dto.TraineeUpdateDto;
 import com.example.gym_crm.trainer.Trainer;
+import com.example.gym_crm.trainer.TrainingDoesNotBelongToTrainerException;
+import com.example.gym_crm.training.Training;
+import com.example.gym_crm.training.TrainingRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +28,8 @@ public class TraineeServiceImpl implements TraineeService {
 
     private UserRepository userRepository;
 
+    private TrainingRepository trainingRepository;
+
     private UserUtils userUtils;
 
     @Autowired
@@ -40,6 +45,11 @@ public class TraineeServiceImpl implements TraineeService {
     @Autowired
     public void setTraineeRepository(TraineeRepository traineeRepository) {
         this.traineeRepository = traineeRepository;
+    }
+
+    @Autowired
+    public void setTrainingRepository(TrainingRepository trainingRepository) {
+        this.trainingRepository = trainingRepository;
     }
 
     @Transactional
@@ -94,6 +104,8 @@ public class TraineeServiceImpl implements TraineeService {
                 ()-> new EntityDoesNotExistException("There is no trainee with id " + traineeUpdateDto.getUserId())
         );
 
+        List<Training> trainings = getAllTrainings(traineeUpdateDto.getTraining_ids(), trainee.getId());
+
         User user = trainee.getUser();
         boolean updatedIdentity = user.updateIdentity(traineeUpdateDto);
         if (updatedIdentity) {
@@ -115,8 +127,26 @@ public class TraineeServiceImpl implements TraineeService {
             trainee.setAddress(traineeUpdateDto.getAddress());
         }
 
+        if (trainings != null) {
+            trainee.setTrainings(trainings);
+        }
+
         userRepository.save(user);
         return traineeRepository.save(trainee);
+    }
+
+    private List<Training> getAllTrainings(List<UUID> trainingIds, UUID traineeId) {
+        if (trainingIds == null) return null;
+        return trainingIds.stream().map( id->{
+            Training training = trainingRepository.findById(id).orElseThrow(
+                () -> new EntityDoesNotExistException("There is no training with id " + id)
+            );
+            if (!training.getTrainee().getId().equals(traineeId)) {
+                throw new TrainingDoesNotBelongToTrainerException("Training with ID " + id + " does not belong to the trainee with id " + traineeId);
+            }
+
+            return training;
+        }).toList();
     }
 
     @Transactional
@@ -234,5 +264,4 @@ public class TraineeServiceImpl implements TraineeService {
         log.debug("Updated trainee {} with {} trainers", username, trainers.size());
         return updatedTrainee;
     }
-
 }

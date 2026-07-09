@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -19,8 +20,9 @@ public class TraineeUpdateDto extends AuthData implements PersonalIdentity {
     private Boolean isActive;
     private LocalDate dateOfBirth;
     private String address;
+    private List<UUID> training_ids;
 
-    public TraineeUpdateDto(UUID userId, String firstName, String lastName, Boolean isActive, LocalDate dateOfBirth, String address, String username, String password) {
+    public TraineeUpdateDto(UUID userId, String firstName, String lastName, Boolean isActive, LocalDate dateOfBirth, String address, String username, String password, List<UUID> training_ids) {
         super(username, password);
         this.userId = userId;
         this.firstName = firstName;
@@ -28,6 +30,7 @@ public class TraineeUpdateDto extends AuthData implements PersonalIdentity {
         this.isActive = isActive;
         this.dateOfBirth = dateOfBirth;
         this.address = address;
+        this.training_ids = training_ids;
     }
 
     @Override

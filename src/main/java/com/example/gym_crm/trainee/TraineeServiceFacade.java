@@ -4,6 +4,7 @@ import com.example.gym_crm.authentification.AuthData;
 import com.example.gym_crm.authentification.RequiresAuth;
 import com.example.gym_crm.trainee.Dto.*;
 import com.example.gym_crm.trainer.Trainer;
+import com.example.gym_crm.training.Training;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

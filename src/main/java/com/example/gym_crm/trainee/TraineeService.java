@@ -3,7 +3,9 @@ package com.example.gym_crm.trainee;
 import com.example.gym_crm.trainee.Dto.TraineeCreateDto;
 import com.example.gym_crm.trainee.Dto.TraineeUpdateDto;
 import com.example.gym_crm.trainer.Trainer;
+import com.example.gym_crm.training.Training;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
