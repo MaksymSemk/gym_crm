@@ -14,4 +14,10 @@ import lombok.NoArgsConstructor;
 public class TraineeChangePasswordDto extends AuthData {
     @NotBlank(message = "New password is required")
     private String newPassword;
+
+    public TraineeChangePasswordDto(String username, String password, String newPassword) {
+        this.setUsername(username);
+        this.setPassword(password);
+        this.newPassword = newPassword;
+    }
 }
