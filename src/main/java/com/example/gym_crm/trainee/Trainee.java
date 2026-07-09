@@ -25,10 +25,10 @@ public class Trainee{
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDate dateOfBirth;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String address;
 
     @OneToMany(mappedBy = "trainee", cascade = CascadeType.ALL, orphanRemoval = true)
