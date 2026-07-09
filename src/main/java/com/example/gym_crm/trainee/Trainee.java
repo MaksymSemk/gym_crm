@@ -1,11 +1,13 @@
 package com.example.gym_crm.trainee;
 
-import com.example.gym_crm.common.repository.EntityId;
 import com.example.gym_crm.common.user.User;
 import com.example.gym_crm.trainer.Trainer;
 import com.example.gym_crm.training.Training;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,7 +19,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "trainees")
-public class Trainee implements EntityId<UUID> {
+public class Trainee{
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -43,14 +45,4 @@ public class Trainee implements EntityId<UUID> {
             inverseJoinColumns = @JoinColumn(name = "trainer_id")
     )
     private List<Trainer> trainers;
-
-    @Override
-    public UUID getId() {
-        return user.getId();
-    }
-
-    @Override
-    public void setId(UUID id) {
-        this.user.setId(id);
-    }
 }

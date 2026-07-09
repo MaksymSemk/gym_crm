@@ -1,6 +1,5 @@
 package com.example.gym_crm.trainer;
 
-import com.example.gym_crm.common.repository.EntityId;
 import com.example.gym_crm.common.user.User;
 import com.example.gym_crm.trainee.Trainee;
 import com.example.gym_crm.training.Training;
@@ -20,7 +19,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "trainers")
-public class Trainer implements EntityId<UUID> {
+public class Trainer{
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -44,14 +43,4 @@ public class Trainer implements EntityId<UUID> {
             inverseJoinColumns = @JoinColumn(name = "trainee_id")
     )
     private List<Trainee> trainees;
-
-    @Override
-    public UUID getId() {
-        return user.getId();
-    }
-
-    @Override
-    public void setId(UUID id) {
-        this.user.setId(id);
-    }
 }

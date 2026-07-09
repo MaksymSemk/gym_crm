@@ -1,6 +1,5 @@
 package com.example.gym_crm.training_type;
 
-import com.example.gym_crm.common.repository.EntityId;
 import com.example.gym_crm.trainer.Trainer;
 import com.example.gym_crm.training.Training;
 import jakarta.persistence.*;
@@ -13,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "training_types")
-public class TrainingType implements EntityId<Long> {
+public class TrainingType{
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -27,14 +26,4 @@ public class TrainingType implements EntityId<Long> {
 
     @OneToMany(mappedBy = "trainingType")
     private List<Training> trainings;
-
-    @Override
-    public Long getId() {
-        return this.id;
-    }
-
-    @Override
-    public void setId(Long id) {
-        this.id = id;
-    }
 }

@@ -1,6 +1,5 @@
 package com.example.gym_crm.training;
 
-import com.example.gym_crm.common.repository.EntityId;
 import com.example.gym_crm.trainee.Trainee;
 import com.example.gym_crm.trainer.Trainer;
 import com.example.gym_crm.training_type.TrainingType;
@@ -19,7 +18,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 @Table(name = "trainings")
-public class Training implements EntityId<UUID> {
+public class Training {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
