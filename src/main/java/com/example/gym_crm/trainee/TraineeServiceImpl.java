@@ -188,6 +188,7 @@ public class TraineeServiceImpl implements TraineeService {
         );
     }
 
+    @Transactional
     @Override
     public Trainee getTraineeByUsername(String username) {
         if (username == null || username.isBlank()) {

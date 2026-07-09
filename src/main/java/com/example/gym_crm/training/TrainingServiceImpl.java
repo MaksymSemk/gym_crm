@@ -58,6 +58,7 @@ public class TrainingServiceImpl implements TrainingService {
         return savedTraining;
     }
 
+    @Transactional
     @Override
     public Training getTraining(UUID id) {
         if (id == null) {

@@ -28,22 +28,18 @@ class TrainingRepositoryTest extends BaseRepositoryTest {
     @Autowired private TrainerRepository trainerRepository;
     @Autowired private TrainingTypeRepository trainingTypeRepository;
 
-    private Trainee traineeJohn;
-    private Trainer trainerEmma;
-    private TrainingType typeYoga;
-
     @BeforeEach
     void seedData() {
-        typeYoga = new TrainingType();
+        TrainingType typeYoga = new TrainingType();
         typeYoga.setName("Yoga");
         trainingTypeRepository.save(typeYoga);
 
         User u1 = User.builder().firstName("John").lastName("Doe").username("John.Doe").password("p1").isActive(true).build();
-        traineeJohn = Trainee.builder().user(u1).build();
+        Trainee traineeJohn = Trainee.builder().user(u1).build();
         traineeRepository.save(traineeJohn);
 
         User u2 = User.builder().firstName("Emma").lastName("Watson").username("Emma.Watson").password("p2").isActive(true).build();
-        trainerEmma = Trainer.builder().specialization(typeYoga).user(u2).build();
+        Trainer trainerEmma = Trainer.builder().specialization(typeYoga).user(u2).build();
         trainerRepository.save(trainerEmma);
 
         Training session1 = Training.builder()

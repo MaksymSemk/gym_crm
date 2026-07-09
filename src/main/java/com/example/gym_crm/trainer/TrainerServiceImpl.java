@@ -76,6 +76,7 @@ public class TrainerServiceImpl implements TrainerService {
         return trainerRepository.save(newTrainer);
     }
 
+    @Transactional
     @Override
     public Trainer getTrainerByUsername(String username) {
         if (username == null || username.isBlank()) {

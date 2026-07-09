@@ -34,7 +34,7 @@ public class SecurityAspect {
         );
         var password = authData.getPassword();
 
-        if (!password.equals(user.getPassword())) {
+        if (!password.equals(user.getPassword()) || !user.getIsActive()) {
             throw new AuthenticationException("Authentication failed");
         }
     }
