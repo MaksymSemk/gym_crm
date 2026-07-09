@@ -60,7 +60,6 @@ class SecurityAspectTest {
             when(joinPoint.getArgs()).thenReturn(new Object[]{validAuth});
             when(userRepository.findByUsername("trainer.test")).thenReturn(Optional.of(matchedUser));
 
-            // Must execute cleanly without propagating runtime exceptions
             securityAspect.authenticate(joinPoint, requiresAuth);
 
             verify(userRepository, times(1)).findByUsername("trainer.test");
