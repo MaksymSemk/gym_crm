@@ -1,13 +1,18 @@
 package com.example.gym_crm.authentification;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.Objects;
 
-public record AuthData(
-        String username,
-        String password
-) {
-    public AuthData {
-        Objects.requireNonNull(username, "username is required");
-        Objects.requireNonNull(password, "password is required");
+@Data
+@NoArgsConstructor
+public class AuthData {
+    private String username;
+    private String password;
+
+    public AuthData(String username, String password) {
+        this.username = Objects.requireNonNull(username, "username is required");
+        this.password = Objects.requireNonNull(password, "password is required");
     }
 }
