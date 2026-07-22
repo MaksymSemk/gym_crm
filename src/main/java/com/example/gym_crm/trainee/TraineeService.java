@@ -19,4 +19,5 @@ public interface TraineeService {
     void deleteTraineeByUsername(String username);
     Trainee updateTraineeTrainers(TraineeUpdateTrainersDto dto);
     List<Training> getTraineeTrainings(TraineeTrainingsSearchDto dto);
+    List<Trainer> getUnassignedActiveTrainers(String username);
 }

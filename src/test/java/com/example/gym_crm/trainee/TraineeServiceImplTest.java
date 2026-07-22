@@ -87,7 +87,7 @@ class TraineeServiceImplTest {
         @Test
         @DisplayName("Should create trainee successfully when inputs are valid")
         void createTrainee_Success() {
-            TraineeCreateDto dto = new TraineeCreateDto("John", "Doe", true, LocalDate.of(2000, 1, 1), "123 Street");
+            TraineeCreateDto dto = new TraineeCreateDto("John", "Doe", LocalDate.of(2000, 1, 1), "123 Street");
 
             when(userUtils.createUsername("John", "Doe")).thenReturn("John.Doe");
             when(userUtils.generatePassword()).thenReturn("generatedPass");
@@ -109,7 +109,7 @@ class TraineeServiceImplTest {
         @Test
         @DisplayName("Should throw IllegalArgumentException when date of birth is in the future")
         void createTrainee_FutureBirthDate_ThrowsException() {
-            TraineeCreateDto dto = new TraineeCreateDto("John", "Doe", true, LocalDate.now().plusDays(5), "123 Street");
+            TraineeCreateDto dto = new TraineeCreateDto("John", "Doe", LocalDate.now().plusDays(5), "123 Street");
             assertThrows(IllegalArgumentException.class, () -> traineeService.createTrainee(dto));
         }
     }
@@ -121,14 +121,9 @@ class TraineeServiceImplTest {
         @Test
         @DisplayName("Should update trainee profile details successfully without changing username if names remain identical")
         void updateTrainee_Success_NoNameChange() {
-            TraineeUpdateDto dto = new TraineeUpdateDto();
-            dto.setUserId(traineeId);
-            dto.setFirstName("John");
-            dto.setLastName("Doe");
-            dto.setIsActive(false);
-            dto.setAddress("456 New Ave");
+            TraineeUpdateDto dto = new TraineeUpdateDto(sampleTrainee.getUser().getUsername(), "John", "Doe", LocalDate.of(2000, 1, 1), "456 New Ave", true);
 
-            when(traineeRepository.findById(traineeId)).thenReturn(Optional.of(sampleTrainee));
+            when(traineeRepository.findByUserUsername(sampleTrainee.getUser().getUsername())).thenReturn(Optional.of(sampleTrainee));
             when(userRepository.save(any(User.class))).thenReturn(sampleUser);
             when(traineeRepository.save(any(Trainee.class))).thenReturn(sampleTrainee);
 
@@ -144,9 +139,7 @@ class TraineeServiceImplTest {
         @DisplayName("Should throw TrainingDoesNotBelongToTrainerException when a linked training id cross-match check fails")
         void updateTrainee_MismatchedTrainingTrainee_ThrowsException() {
             UUID badTrainingId = UUID.randomUUID();
-            TraineeUpdateDto dto = new TraineeUpdateDto();
-            dto.setUserId(traineeId);
-            dto.setTraining_ids(List.of(badTrainingId));
+            TraineeUpdateDto dto = new TraineeUpdateDto(sampleTrainee.getUser().getUsername(), "John", "Doe", LocalDate.of(2000, 1, 1), "456 New Ave", true);
 
             Training mismatchedTraining = new Training();
             Trainee otherTrainee = new Trainee();
@@ -257,9 +250,8 @@ class TraineeServiceImplTest {
         Trainer mockTrainer = new Trainer();
         mockTrainer.setId(trainerUUID);
 
-        TraineeUpdateTrainersDto dto = new TraineeUpdateTrainersDto();
-        dto.setUsername("John.Doe");
-        dto.setTrainerIds(List.of(trainerUUID));
+        TraineeUpdateTrainersDto dto = new TraineeUpdateTrainersDto("Jonhn.Doe", List.of(new TraineeUpdateTrainersDto.TrainerUsernameDto("Jane.Doe")));
+
 
         when(trainerRepository.findById(trainerUUID)).thenReturn(Optional.of(mockTrainer));
         when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.of(sampleTrainee));

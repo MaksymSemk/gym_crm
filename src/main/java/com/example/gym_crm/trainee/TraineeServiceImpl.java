@@ -1,11 +1,13 @@
 package com.example.gym_crm.trainee;
 
 import com.example.gym_crm.common.exception.EntityDoesNotExistException;
+import com.example.gym_crm.common.user.PersonalIdentity;
 import com.example.gym_crm.common.user.User;
 import com.example.gym_crm.common.user.UserRepository;
 import com.example.gym_crm.common.user.UserUtils;
 import com.example.gym_crm.trainee.Dto.*;
 import com.example.gym_crm.trainee.repository.TraineeRepository;
+import com.example.gym_crm.trainer.Trainer;
 import com.example.gym_crm.trainer.repository.TrainerRepository;
 import com.example.gym_crm.trainer.TrainingDoesNotBelongToTrainerException;
 import com.example.gym_crm.training.Training;
@@ -80,7 +82,7 @@ public class TraineeServiceImpl implements TraineeService {
                 .lastName(traineeCreateDto.lastName())
                 .username(username)
                 .password(password)
-                .isActive(traineeCreateDto.isActive())
+                .isActive(true)
                 .build();
 
         Trainee newTrainee = Trainee.builder()
@@ -98,44 +100,42 @@ public class TraineeServiceImpl implements TraineeService {
     @Transactional
     @Override
     public Trainee updateTrainee(TraineeUpdateDto traineeUpdateDto) {
-        if (traineeUpdateDto == null) {
-            throw new IllegalArgumentException("Trainee update DTO cannot be null");
-        }
 
-        log.debug("Updating trainee with ID: {}", traineeUpdateDto.getUserId());
-        if (traineeUpdateDto.getUserId() == null) {
-            throw new IllegalArgumentException("Trainee user ID cannot be null");
-        }
-
-        var trainee = traineeRepository.findById(traineeUpdateDto.getUserId()).orElseThrow(
-                ()-> new EntityDoesNotExistException("There is no trainee with id " + traineeUpdateDto.getUserId())
+        var trainee = traineeRepository.findByUserUsername(traineeUpdateDto.username()).orElseThrow(
+                ()-> new EntityDoesNotExistException("There is no trainee with id " + traineeUpdateDto.username())
         );
 
-        List<Training> trainings = getAllTrainings(traineeUpdateDto.getTraining_ids(), trainee.getId());
+        log.debug("Updating trainee with ID: {}", trainee.getId());
 
         User user = trainee.getUser();
-        boolean updatedIdentity = user.updateIdentity(traineeUpdateDto);
+        boolean updatedIdentity = user.updateIdentity(new PersonalIdentity() {
+            @Override
+            public String getFirstName() {
+                return traineeUpdateDto.firstName() != null ? traineeUpdateDto.firstName() : user.getFirstName();
+            }
+
+            @Override
+            public String getLastName() {
+                return traineeUpdateDto.lastName() != null ? traineeUpdateDto.lastName() : user.getLastName();
+            }
+        });
         if (updatedIdentity) {
             user.setUsername(userUtils.createUsername(user.getFirstName(), user.getLastName()));
         }
 
-        if(traineeUpdateDto.getIsActive()!=null){
-            user.setIsActive(traineeUpdateDto.getIsActive());
+        if(traineeUpdateDto.isActive()!=null){
+            user.setIsActive(traineeUpdateDto.isActive());
         }
 
-        if (traineeUpdateDto.getDateOfBirth() != null) {
-            if (traineeUpdateDto.getDateOfBirth().isAfter(LocalDate.now())) {
+        if (traineeUpdateDto.dateOfBirth() != null) {
+            if (traineeUpdateDto.dateOfBirth().isAfter(LocalDate.now())) {
                 throw new IllegalArgumentException("Date of birth cannot be in the future");
             }
-            trainee.setDateOfBirth(traineeUpdateDto.getDateOfBirth());
+            trainee.setDateOfBirth(traineeUpdateDto.dateOfBirth());
         }
 
-        if(traineeUpdateDto.getAddress()!=null && !traineeUpdateDto.getAddress().isBlank()){
-            trainee.setAddress(traineeUpdateDto.getAddress());
-        }
-
-        if (trainings != null) {
-            trainee.setTrainings(trainings);
+        if(traineeUpdateDto.address()!=null && !traineeUpdateDto.address().isBlank()){
+            trainee.setAddress(traineeUpdateDto.address());
         }
 
         userRepository.save(user);
@@ -254,18 +254,15 @@ public class TraineeServiceImpl implements TraineeService {
     @Transactional
     @Override
     public Trainee updateTraineeTrainers(TraineeUpdateTrainersDto dto) {
-        if (dto == null || dto.getUsername() == null || dto.getTrainerIds() == null) {
-            throw new IllegalArgumentException("Invalid trainers re-assignment payload data");
-        }
-        var trainers = dto.getTrainerIds().stream().map(trainerId -> trainerRepository.findById(trainerId).orElseThrow(
-                () -> new EntityDoesNotExistException("There is no trainer with id " + trainerId)
+        var trainers = dto.trainersList().stream().map(trainerUsernameDto -> trainerRepository.findByUserUsername(trainerUsernameDto.username()).orElseThrow(
+                () -> new EntityDoesNotExistException("There is no trainer with id " + trainerUsernameDto)
         )).toList();
 
-        log.debug("Updating trainers list for trainee with username: {}", dto.getUsername());
-        Trainee trainee = getTraineeByUsername(dto.getUsername());
+        Trainee trainee = getTraineeByUsername(dto.traineeUsername());
+        log.debug("Updating trainers list for trainee with id: {}", trainee.getId());
         trainee.setTrainers(trainers);
         Trainee updatedTrainee = traineeRepository.save(trainee);
-        log.debug("Updated trainee {} with {} trainers", dto.getUsername(), trainers.size());
+        log.debug("Updated trainee {} with {} trainers", trainee.getId(), trainers.size());
         return updatedTrainee;
     }
 
@@ -277,5 +274,20 @@ public class TraineeServiceImpl implements TraineeService {
         return trainingRepository.findTraineeTrainingsByCriteria(
                 dto.getUsername(), dto.getFromDate(), dto.getToDate(), dto.getTrainerName(), dto.getTrainingType()
         );
+    }
+
+    @Transactional
+    @Override
+    public List<Trainer> getUnassignedActiveTrainers(String username) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Username cannot be null or empty");
+        }
+
+        log.debug("Fetching unassigned active trainers for trainee: {}", username);
+
+        // Ensure trainee exists before querying; throws EntityDoesNotExistException if missing
+        getTraineeByUsername(username);
+
+        return trainerRepository.findActiveTrainersNotAssignedToTrainee(username);
     }
 }

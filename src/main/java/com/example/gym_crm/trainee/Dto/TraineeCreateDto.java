@@ -12,8 +12,6 @@ public record TraineeCreateDto(
         String firstName,
         @NotBlank(message = "Last name is required")
         String lastName,
-        @NotNull(message = "Active status is required")
-        Boolean isActive,
         @Past(message = "Date of birth must be in the past")
         LocalDate dateOfBirth,
         String address

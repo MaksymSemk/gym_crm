@@ -146,7 +146,7 @@ class TrainerServiceImplTest {
         @Test
         @DisplayName("Should fetch unassigned trainers using sub-query criteria on the repository layer")
         void getUnassignedTrainersByTraineeUsername_Success() {
-            when(trainerRepository.findTrainersNotAssignedToTrainee("trainee.user")).thenReturn(List.of(sampleTrainer));
+            when(trainerRepository.findActiveTrainersNotAssignedToTrainee("trainee.user")).thenReturn(List.of(sampleTrainer));
 
             List<Trainer> results = trainerService.getUnassignedTrainersByTraineeUsername("trainee.user");
 

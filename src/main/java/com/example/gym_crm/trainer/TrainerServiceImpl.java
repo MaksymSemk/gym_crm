@@ -157,7 +157,7 @@ public class TrainerServiceImpl implements TrainerService {
         if (traineeUsername == null || traineeUsername.isBlank()) {
             throw new IllegalArgumentException("Trainee username cannot be empty");
         }
-        return trainerRepository.findTrainersNotAssignedToTrainee(traineeUsername);
+        return trainerRepository.findActiveTrainersNotAssignedToTrainee(traineeUsername);
     }
 
     @Override
