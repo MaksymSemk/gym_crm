@@ -48,7 +48,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorMessage> handleValidationException(
             MethodArgumentNotValidException ex, HttpServletRequest request) {
 
-        // Collect all validation failure messages into a clean comma-separated string
         String errorDetails = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .collect(Collectors.joining(", "));

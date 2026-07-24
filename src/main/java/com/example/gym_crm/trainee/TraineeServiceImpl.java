@@ -216,7 +216,6 @@ public class TraineeServiceImpl implements TraineeService {
         Trainee trainee = getTraineeByUsername(username);
         User user = trainee.getUser();
 
-        // Enforce Non-Idempotency: Reject attempt if requested state matches current state
         if (user.getIsActive().equals(isActive)) {
             throw new IllegalArgumentException(
                     String.format("Trainee '%s' is already in active status: %b. Action is non-idempotent.", username, isActive)
