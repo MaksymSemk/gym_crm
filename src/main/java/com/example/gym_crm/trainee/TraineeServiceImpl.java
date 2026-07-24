@@ -100,16 +100,21 @@ public class TraineeServiceImpl implements TraineeService {
     @Transactional
     @Override
     public Trainee updateTrainee(TraineeUpdateDto traineeUpdateDto) {
+        if (traineeUpdateDto == null || traineeUpdateDto.username() == null) {
+            throw new IllegalArgumentException("Invalid update parameters");
+        }
 
-        var trainee = traineeRepository.findByUserUsername(traineeUpdateDto.username()).orElseThrow(
-                ()-> new EntityDoesNotExistException("There is no trainee with id " + traineeUpdateDto.username())
-        );
+        log.debug("Updating trainee profile for username: {}", traineeUpdateDto.username());
 
-        log.debug("Updating trainee with ID: {}", trainee.getId());
+        Trainee trainee = traineeRepository.findByUserUsername(traineeUpdateDto.username())
+                .orElseThrow(() -> new EntityDoesNotExistException("Trainee not found with username: " + traineeUpdateDto.username()));
 
         User user = trainee.getUser();
 
-        if(traineeUpdateDto.isActive()!=null){
+        user.setFirstName(traineeUpdateDto.firstName());
+        user.setLastName(traineeUpdateDto.lastName());
+
+        if (traineeUpdateDto.isActive() != null) {
             user.setIsActive(traineeUpdateDto.isActive());
         }
 
@@ -120,7 +125,7 @@ public class TraineeServiceImpl implements TraineeService {
             trainee.setDateOfBirth(traineeUpdateDto.dateOfBirth());
         }
 
-        if(traineeUpdateDto.address()!=null && !traineeUpdateDto.address().isBlank()){
+        if (traineeUpdateDto.address() != null && !traineeUpdateDto.address().isBlank()) {
             trainee.setAddress(traineeUpdateDto.address());
         }
 
@@ -203,18 +208,24 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Transactional
     @Override
-    public Trainee updateTraineeStatus(String username) {
-        if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("Username cannot be null or empty");
+    public Trainee updateTraineeStatus(String username, Boolean isActive) {
+        if (username == null || username.isBlank() || isActive == null) {
+            throw new IllegalArgumentException("Username and active status must be provided");
         }
 
-        log.debug("Updating activation status for trainee with username: {}", username);
         Trainee trainee = getTraineeByUsername(username);
         User user = trainee.getUser();
-        Boolean currentStatus = user.getIsActive();
-        user.setIsActive(!currentStatus);
-        log.debug("Trainee {} status changed from {} to {}", username, currentStatus, !currentStatus);
+
+        // Enforce Non-Idempotency: Reject attempt if requested state matches current state
+        if (user.getIsActive().equals(isActive)) {
+            throw new IllegalArgumentException(
+                    String.format("Trainee '%s' is already in active status: %b. Action is non-idempotent.", username, isActive)
+            );
+        }
+
+        user.setIsActive(isActive);
         userRepository.save(user);
+        log.debug("Trainee {} status changed to {}", username, isActive);
         return trainee;
     }
 

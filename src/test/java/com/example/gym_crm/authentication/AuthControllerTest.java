@@ -18,8 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AuthController.class)
@@ -40,7 +39,7 @@ class AuthControllerTest {
     void login_Success() throws Exception {
         doNothing().when(authService).login(any(LoginRequestDto.class), any(), any());
 
-        mockMvc.perform(get("/api/v1/auth/login")
+        mockMvc.perform(post("/api/v1/auth/login")
                         .param("username", "john.doe")
                         .param("password", "secret123"))
                 .andExpect(status().isOk());
@@ -51,7 +50,7 @@ class AuthControllerTest {
     @Test
     @DisplayName("GET /api/v1/auth/login - Missing Query Params Returns 400 Bad Request")
     void login_ValidationError() throws Exception {
-        mockMvc.perform(get("/api/v1/auth/login")
+        mockMvc.perform(post("/api/v1/auth/login")
                         .param("username", "")
                         .param("password", ""))
                 .andExpect(status().isBadRequest());

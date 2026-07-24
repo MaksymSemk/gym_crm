@@ -138,16 +138,17 @@ class GymFacadeTest {
         @Test
         @DisplayName("Should delegate updateTraineeStatus username verification parameter directly to TraineeService")
         void updateTraineeStatus_DelegatesCorrectly() {
+            var status= false;
             AuthData authData = mock(AuthData.class);
             when(authData.getUsername()).thenReturn("john.doe");
             Trainee expected = new Trainee();
-            when(traineeService.updateTraineeStatus("john.doe")).thenReturn(expected);
+            when(traineeService.updateTraineeStatus("john.doe", status)).thenReturn(expected);
 
-            Trainee result = gymFacade.updateTraineeStatus(authData);
+            Trainee result = gymFacade.updateTraineeStatus(authData, status);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(traineeService, times(1)).updateTraineeStatus("john.doe");
+            verify(traineeService, times(1)).updateTraineeStatus("john.doe", status);
         }
 
         @Test
@@ -271,16 +272,17 @@ class GymFacadeTest {
         @Test
         @DisplayName("Should delegate updateTrainerStatus string lookup value parameters down to TrainerService")
         void updateTrainerStatus_DelegatesCorrectly() {
+            var status = false;
             AuthData authData = mock(AuthData.class);
             when(authData.getUsername()).thenReturn("trainer.smith");
             Trainer expected = new Trainer();
-            when(trainerService.updateTrainerStatus("trainer.smith")).thenReturn(expected);
+            when(trainerService.updateTrainerStatus("trainer.smith", status)).thenReturn(expected);
 
-            Trainer result = gymFacade.updateTrainerStatus(authData);
+            Trainer result = gymFacade.updateTrainerStatus(authData, status);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(trainerService, times(1)).updateTrainerStatus("trainer.smith");
+            verify(trainerService, times(1)).updateTrainerStatus("trainer.smith",  status);
         }
 
         @Test

@@ -94,10 +94,16 @@ public class TrainerServiceImpl implements TrainerService {
         if (dto == null || dto.username() == null) {
             throw new IllegalArgumentException("Invalid update parameters");
         }
+
         log.debug("Updating trainer profile for username: {}", dto.username());
 
-        Trainer trainer = getTrainerByUsername(dto.username());
+        Trainer trainer = trainerRepository.findByUserUsername(dto.username())
+                .orElseThrow(() -> new EntityDoesNotExistException("Trainer not found with username: " + dto.username()));
+
         User user = trainer.getUser();
+
+        user.setFirstName(dto.firstName());
+        user.setLastName(dto.lastName());
 
         if (dto.isActive() != null) {
             user.setIsActive(dto.isActive());
@@ -122,14 +128,26 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Transactional
     @Override
-    public Trainer updateTrainerStatus(String username) {
+    public Trainer updateTrainerStatus(String username, Boolean isActive) {
+        if (username == null || username.isBlank() || isActive == null) {
+            throw new IllegalArgumentException("Username and active status must be provided");
+        }
+
         Trainer trainer = getTrainerByUsername(username);
         User user = trainer.getUser();
-        user.setIsActive(!user.getIsActive());
+
+        if (user.getIsActive().equals(isActive)) {
+            throw new IllegalArgumentException(
+                    String.format("Trainer '%s' is already in active status: %b. Action is non-idempotent.", username, isActive)
+            );
+        }
+
+        user.setIsActive(isActive);
         userRepository.save(user);
-        log.debug("Trainer status updated for: {}", username);
+        log.debug("Trainer {} status changed to {}", username, isActive);
         return trainer;
     }
+
 
     @Transactional
     @Override

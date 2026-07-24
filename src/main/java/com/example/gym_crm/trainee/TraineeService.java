@@ -15,7 +15,7 @@ public interface TraineeService {
     Trainee getTraineeById(UUID id);
     Trainee getTraineeByUsername(String username);
     Trainee changePassword(TraineeChangePasswordDto dto);
-    Trainee updateTraineeStatus(String username);
+    Trainee updateTraineeStatus(String username, Boolean newStatus);
     void deleteTraineeByUsername(String username);
     Trainee updateTraineeTrainers(TraineeUpdateTrainersDto dto);
     List<Training> getTraineeTrainings(TraineeTrainingsSearchDto dto);

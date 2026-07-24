@@ -198,7 +198,7 @@ class TrainerServiceImplTest {
             when(trainerRepository.findByUserUsername("Alex.Turner")).thenReturn(Optional.of(sampleTrainer));
             when(userRepository.save(any(User.class))).thenReturn(sampleUser);
 
-            Trainer result = trainerService.updateTrainerStatus("Alex.Turner");
+            Trainer result = trainerService.updateTrainerStatus("Alex.Turner", false);
 
             assertFalse(result.getUser().getIsActive());
         }

@@ -1,6 +1,7 @@
 package com.example.gym_crm.trainer;
 
 import com.example.gym_crm.trainer.Dto.TrainerCreateDto;
+import com.example.gym_crm.trainer.Dto.TrainerStatusUpdateDto;
 import com.example.gym_crm.trainer.Dto.TrainerTrainingsSearchDto;
 import com.example.gym_crm.trainer.Dto.TrainerUpdateDto;
 import com.example.gym_crm.trainer.Dto.response.TrainerCreatedResponse;
@@ -87,14 +88,15 @@ public class TrainerController {
         return ResponseEntity.ok(trainerMapper.toTrainerTrainingResponseList(trainings));
     }
 
-    @Operation(summary = "Activate/De-Activate Trainer", description = "Toggles active status of a trainer")
+    @Operation(summary = "Activate/De-Activate Trainer", description = "Updates active status of a trainer")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Status updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid payload or redundant status transition"),
             @ApiResponse(responseCode = "404", description = "Trainer not found")
     })
-    @PatchMapping("/status/{username}")
-    public ResponseEntity<Void> toggleTrainerStatus(@PathVariable String username) {
-        trainerService.updateTrainerStatus(username);
+    @PatchMapping("/status")
+    public ResponseEntity<Void> toggleTrainerStatus(@Valid @RequestBody TrainerStatusUpdateDto dto) {
+        trainerService.updateTrainerStatus(dto.username(), dto.isActive());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

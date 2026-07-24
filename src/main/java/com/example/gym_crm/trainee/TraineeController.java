@@ -121,14 +121,15 @@ public class TraineeController {
         return ResponseEntity.ok(traineeMapper.toTraineeTrainingResponseList(trainings));
     }
 
-    @Operation(summary = "Activate/Deactivate Trainee", description = "Changes active status of a trainee")
+    @Operation(summary = "Activate/De-Activate Trainee", description = "Updates active status of a trainee")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Status toggled successfully"),
+            @ApiResponse(responseCode = "200", description = "Status updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid payload or redundant status transition"),
             @ApiResponse(responseCode = "404", description = "Trainee not found")
     })
-    @PatchMapping("/status/{username}")
-    public ResponseEntity<Void> toggleTraineeStatus(@PathVariable String username) {
-        traineeService.updateTraineeStatus(username);
+    @PatchMapping("/status")
+    public ResponseEntity<Void> toggleTraineeStatus(@Valid @RequestBody TraineeStatusUpdateDto dto) {
+        traineeService.updateTraineeStatus(dto.username(), dto.isActive());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

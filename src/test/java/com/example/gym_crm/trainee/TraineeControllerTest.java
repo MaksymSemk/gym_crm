@@ -1,6 +1,7 @@
 package com.example.gym_crm.trainee;
 
 import com.example.gym_crm.trainee.Dto.TraineeCreateDto;
+import com.example.gym_crm.trainee.Dto.TraineeStatusUpdateDto;
 import com.example.gym_crm.trainee.Dto.TraineeUpdateDto;
 import com.example.gym_crm.trainee.Dto.TraineeUpdateTrainersDto;
 import com.example.gym_crm.trainee.Dto.responce.TraineeCreatedResponse;
@@ -220,10 +221,13 @@ class TraineeControllerTest {
     @Test
     @DisplayName("PATCH /api/v1/trainees/status - Success")
     void toggleTraineeStatus_Success() throws Exception {
-        mockMvc.perform(patch("/api/v1/trainees/status/john.doe")
-                        .contentType(MediaType.APPLICATION_JSON))
+        TraineeStatusUpdateDto dto = new TraineeStatusUpdateDto("john.doe", false);
+
+        mockMvc.perform(patch("/api/v1/trainees/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk());
 
-        verify(traineeService).updateTraineeStatus("john.doe");
+        verify(traineeService).updateTraineeStatus("john.doe",false);
     }
 }

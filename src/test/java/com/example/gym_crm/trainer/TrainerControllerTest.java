@@ -1,6 +1,8 @@
 package com.example.gym_crm.trainer;
 
+import com.example.gym_crm.trainee.Dto.TraineeStatusUpdateDto;
 import com.example.gym_crm.trainer.Dto.TrainerCreateDto;
+import com.example.gym_crm.trainer.Dto.TrainerStatusUpdateDto;
 import com.example.gym_crm.trainer.Dto.TrainerUpdateDto;
 import com.example.gym_crm.trainer.Dto.response.TraineeInfoDto;
 import com.example.gym_crm.trainer.Dto.response.TrainerCreatedResponse;
@@ -146,11 +148,13 @@ class TrainerControllerTest {
     @Test
     @DisplayName("PATCH /api/v1/trainers/status - Success")
     void toggleTrainerStatus_Success() throws Exception {
+        TrainerStatusUpdateDto dto = new TrainerStatusUpdateDto("Alice.Smith", false);
 
-        mockMvc.perform(patch("/api/v1/trainers/status/Alice.Smith")
-                        .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(patch("/api/v1/trainers/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk());
 
-        verify(trainerService).updateTrainerStatus("Alice.Smith");
+        verify(trainerService).updateTrainerStatus("Alice.Smith", false);
     }
 }

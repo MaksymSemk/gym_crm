@@ -181,7 +181,7 @@ class TraineeServiceImplTest {
         void updateTraineeStatus_Success() {
             when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.of(sampleTrainee));
 
-            Trainee result = traineeService.updateTraineeStatus("John.Doe");
+            Trainee result = traineeService.updateTraineeStatus("John.Doe", false);
 
             assertFalse(result.getUser().getIsActive());
             verify(userRepository, times(1)).save(sampleUser);

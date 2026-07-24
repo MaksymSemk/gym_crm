@@ -50,8 +50,8 @@ public class GymFacade {
         return traineeService.changePassword(dto);
     }
 
-    public Trainee updateTraineeStatus(@Valid AuthData authData) {
-        return traineeService.updateTraineeStatus(authData.getUsername());
+    public Trainee updateTraineeStatus(@Valid AuthData authData, boolean status) {
+        return traineeService.updateTraineeStatus(authData.getUsername(), status);
     }
 
     public void deleteTraineeByUsername(@Valid AuthData authData) {
@@ -87,8 +87,8 @@ public class GymFacade {
         return trainerService.changePassword(dto);
     }
 
-    public Trainer updateTrainerStatus(@Valid AuthData authData) {
-        return trainerService.updateTrainerStatus(authData.getUsername());
+    public Trainer updateTrainerStatus(@Valid AuthData authData, Boolean status) {
+        return trainerService.updateTrainerStatus(authData.getUsername(), status);
     }
 
     public List<Training> getTrainerTrainings(@Valid TrainerTrainingsSearchDto dto) {
