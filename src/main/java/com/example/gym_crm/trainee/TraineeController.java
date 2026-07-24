@@ -126,9 +126,9 @@ public class TraineeController {
             @ApiResponse(responseCode = "200", description = "Status toggled successfully"),
             @ApiResponse(responseCode = "404", description = "Trainee not found")
     })
-    @PatchMapping("/status")
-    public ResponseEntity<Void> toggleTraineeStatus(@Valid @RequestBody TraineeStatusUpdateDto dto) {
-        traineeService.updateTraineeStatus(dto.username());
+    @PatchMapping("/status/{username}")
+    public ResponseEntity<Void> toggleTraineeStatus(@PathVariable String username) {
+        traineeService.updateTraineeStatus(username);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

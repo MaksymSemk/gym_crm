@@ -108,20 +108,6 @@ public class TraineeServiceImpl implements TraineeService {
         log.debug("Updating trainee with ID: {}", trainee.getId());
 
         User user = trainee.getUser();
-        boolean updatedIdentity = user.updateIdentity(new PersonalIdentity() {
-            @Override
-            public String getFirstName() {
-                return traineeUpdateDto.firstName() != null ? traineeUpdateDto.firstName() : user.getFirstName();
-            }
-
-            @Override
-            public String getLastName() {
-                return traineeUpdateDto.lastName() != null ? traineeUpdateDto.lastName() : user.getLastName();
-            }
-        });
-        if (updatedIdentity) {
-            user.setUsername(userUtils.createUsername(user.getFirstName(), user.getLastName()));
-        }
 
         if(traineeUpdateDto.isActive()!=null){
             user.setIsActive(traineeUpdateDto.isActive());

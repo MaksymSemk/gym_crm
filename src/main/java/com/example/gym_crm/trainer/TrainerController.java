@@ -1,7 +1,6 @@
 package com.example.gym_crm.trainer;
 
 import com.example.gym_crm.trainer.Dto.TrainerCreateDto;
-import com.example.gym_crm.trainer.Dto.TrainerStatusUpdateDto;
 import com.example.gym_crm.trainer.Dto.TrainerTrainingsSearchDto;
 import com.example.gym_crm.trainer.Dto.TrainerUpdateDto;
 import com.example.gym_crm.trainer.Dto.response.TrainerCreatedResponse;
@@ -93,9 +92,9 @@ public class TrainerController {
             @ApiResponse(responseCode = "200", description = "Status updated successfully"),
             @ApiResponse(responseCode = "404", description = "Trainer not found")
     })
-    @PatchMapping("/status")
-    public ResponseEntity<Void> toggleTrainerStatus(@Valid @RequestBody TrainerStatusUpdateDto dto) {
-        trainerService.updateTrainerStatus(dto.username());
+    @PatchMapping("/status/{username}")
+    public ResponseEntity<Void> toggleTrainerStatus(@PathVariable String username) {
+        trainerService.updateTrainerStatus(username);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

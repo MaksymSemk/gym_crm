@@ -99,20 +99,6 @@ public class TrainerServiceImpl implements TrainerService {
         Trainer trainer = getTrainerByUsername(dto.username());
         User user = trainer.getUser();
 
-        boolean updatedIdentity = user.updateIdentity(new PersonalIdentity() {
-            @Override
-            public String getFirstName() {
-                return dto.firstName() != null ? dto.firstName() : user.getFirstName();
-            }
-            @Override
-            public String getLastName() {
-                return dto.lastName() != null ? dto.lastName() : user.getLastName();
-            }
-        });
-
-        if (updatedIdentity) {
-            user.setUsername(userUtils.createUsername(user.getFirstName(), user.getLastName()));
-        }
         if (dto.isActive() != null) {
             user.setIsActive(dto.isActive());
         }

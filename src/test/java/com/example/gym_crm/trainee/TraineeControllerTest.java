@@ -1,7 +1,6 @@
 package com.example.gym_crm.trainee;
 
 import com.example.gym_crm.trainee.Dto.TraineeCreateDto;
-import com.example.gym_crm.trainee.Dto.TraineeStatusUpdateDto;
 import com.example.gym_crm.trainee.Dto.TraineeUpdateDto;
 import com.example.gym_crm.trainee.Dto.TraineeUpdateTrainersDto;
 import com.example.gym_crm.trainee.Dto.responce.TraineeCreatedResponse;
@@ -15,9 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -223,11 +220,8 @@ class TraineeControllerTest {
     @Test
     @DisplayName("PATCH /api/v1/trainees/status - Success")
     void toggleTraineeStatus_Success() throws Exception {
-        TraineeStatusUpdateDto dto = new TraineeStatusUpdateDto("john.doe", false);
-
-        mockMvc.perform(patch("/api/v1/trainees/status")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+        mockMvc.perform(patch("/api/v1/trainees/status/john.doe")
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         verify(traineeService).updateTraineeStatus("john.doe");
