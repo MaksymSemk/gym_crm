@@ -1,6 +1,7 @@
 package com.example.gym_crm.trainer;
 
 import com.example.gym_crm.common.exception.EntityDoesNotExistException;
+import com.example.gym_crm.common.user.PersonalIdentity;
 import com.example.gym_crm.common.user.User;
 import com.example.gym_crm.common.user.UserRepository;
 import com.example.gym_crm.common.user.UserUtils;
@@ -63,7 +64,7 @@ public class TrainerServiceImpl implements TrainerService {
                 .lastName(dto.lastName())
                 .username(username)
                 .password(password)
-                .isActive(dto.isActive())
+                .isActive(true)
                 .build();
 
         Trainer newTrainer = Trainer.builder()
@@ -90,28 +91,30 @@ public class TrainerServiceImpl implements TrainerService {
     @Transactional
     @Override
     public Trainer updateTrainer(TrainerUpdateDto dto) {
-        if (dto == null || dto.getUserId() == null) {
+        if (dto == null || dto.username() == null) {
             throw new IllegalArgumentException("Invalid update parameters");
         }
+        log.debug("Updating trainer profile for username: {}", dto.username());
 
-        log.debug("Updating trainer profile for ID: {}", dto.getUserId());
-        Trainer trainer = trainerRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new EntityDoesNotExistException("Trainer not found"));
-
+        Trainer trainer = getTrainerByUsername(dto.username());
         User user = trainer.getUser();
-        boolean updatedIdentity = user.updateIdentity(dto);
+
+        boolean updatedIdentity = user.updateIdentity(new PersonalIdentity() {
+            @Override
+            public String getFirstName() {
+                return dto.firstName() != null ? dto.firstName() : user.getFirstName();
+            }
+            @Override
+            public String getLastName() {
+                return dto.lastName() != null ? dto.lastName() : user.getLastName();
+            }
+        });
+
         if (updatedIdentity) {
             user.setUsername(userUtils.createUsername(user.getFirstName(), user.getLastName()));
         }
-
-        if (dto.getIsActive() != null) {
-            user.setIsActive(dto.getIsActive());
-        }
-
-        if (dto.getSpecializationId() != null) {
-            TrainingType specialization = trainingTypeRepository.findById(dto.getSpecializationId())
-                    .orElseThrow(() -> new EntityDoesNotExistException("Specialization not found"));
-            trainer.setSpecialization(specialization);
+        if (dto.isActive() != null) {
+            user.setIsActive(dto.isActive());
         }
 
         userRepository.save(user);

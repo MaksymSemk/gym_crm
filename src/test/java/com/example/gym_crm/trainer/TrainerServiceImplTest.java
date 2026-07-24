@@ -93,7 +93,7 @@ class TrainerServiceImplTest {
         @Test
         @DisplayName("Should save trainer successfully when specialization exists")
         void createTrainer_Success() {
-            TrainerCreateDto dto = new TrainerCreateDto("Alex", "Turner", true, 1L);
+            TrainerCreateDto dto = new TrainerCreateDto("Alex", "Turner", 1L);
 
             when(trainingTypeRepository.findById(1L)).thenReturn(Optional.of(sampleSpecialization));
             when(userUtils.createUsername("Alex", "Turner")).thenReturn("Alex.Turner");
@@ -110,7 +110,7 @@ class TrainerServiceImplTest {
         @Test
         @DisplayName("Should throw EntityDoesNotExistException when specialization ID cannot be resolved")
         void createTrainer_InvalidSpecialization_ThrowsException() {
-            TrainerCreateDto dto = new TrainerCreateDto("Alex", "Turner", true, 99L);
+            TrainerCreateDto dto = new TrainerCreateDto("Alex", "Turner", 99L);
             when(trainingTypeRepository.findById(99L)).thenReturn(Optional.empty());
 
             assertThrows(EntityDoesNotExistException.class, () -> trainerService.createTrainer(dto));
@@ -160,20 +160,11 @@ class TrainerServiceImplTest {
     class UpdateTests {
 
         @Test
-        @DisplayName("Should modify trainer specialization and identity status correctly")
+        @DisplayName("Should modify trainer identity status correctly")
         void updateTrainer_Success() {
-            TrainerUpdateDto dto = new TrainerUpdateDto();
-            dto.setUserId(trainerId);
-            dto.setFirstName("Alex");
-            dto.setLastName("Turner");
-            dto.setIsActive(false);
-            dto.setSpecializationId(2L);
+            TrainerUpdateDto dto = new TrainerUpdateDto("Alex.Turner", "Alex", "Turner", false);
 
-            TrainingType targetSpecialization = new TrainingType();
-            targetSpecialization.setId(2L);
-
-            when(trainerRepository.findById(trainerId)).thenReturn(Optional.of(sampleTrainer));
-            when(trainingTypeRepository.findById(2L)).thenReturn(Optional.of(targetSpecialization));
+            when(trainerRepository.findByUserUsername("Alex.Turner")).thenReturn(Optional.of(sampleTrainer));
             when(userRepository.save(any(User.class))).thenReturn(sampleUser);
             when(trainerRepository.save(any(Trainer.class))).thenReturn(sampleTrainer);
 
@@ -181,7 +172,7 @@ class TrainerServiceImplTest {
 
             assertNotNull(result);
             assertFalse(sampleUser.getIsActive());
-            assertEquals(targetSpecialization, sampleTrainer.getSpecialization());
+            verify(trainerRepository, times(1)).save(sampleTrainer);
         }
 
         @Test
