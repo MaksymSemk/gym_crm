@@ -23,7 +23,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) // Disabled for standard REST API simplicity
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/login", "/api/v1/auth/change-password").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/trainees", "/api/v1/trainers").permitAll()

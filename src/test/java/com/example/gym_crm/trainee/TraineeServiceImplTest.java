@@ -230,7 +230,6 @@ class TraineeServiceImplTest {
     @Test
     @DisplayName("Should cleanly replace trainee coach tracking associations when given valid trainer re-assignment DTO")
     void updateTraineeTrainers_Success() {
-        UUID trainerUUID = UUID.randomUUID();
         Trainer mockTrainer = new Trainer();
         mockTrainer.setUser(User.builder().username("Jane.Doe").build());
 

@@ -47,9 +47,6 @@ class TrainerControllerTest {
     @MockitoBean
     private TrainerMapper trainerMapper;
 
-    // ------------------------------------------------------------------------
-    // 1. Trainer Registration (POST /api/v1/trainers)
-    // ------------------------------------------------------------------------
     @Test
     @DisplayName("POST /api/v1/trainers - Success")
     void registerTrainer_Success() throws Exception {
@@ -81,9 +78,6 @@ class TrainerControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    // ------------------------------------------------------------------------
-    // 2. Get Trainer Profile (GET /api/v1/trainers/{username})
-    // ------------------------------------------------------------------------
     @Test
     @DisplayName("GET /api/v1/trainers/{username} - Success")
     void getTrainerProfile_Success() throws Exception {
@@ -106,9 +100,6 @@ class TrainerControllerTest {
         verify(trainerService).getTrainerByUsername(username);
     }
 
-    // ------------------------------------------------------------------------
-    // 3. Update Trainer Profile (PUT /api/v1/trainers)
-    // ------------------------------------------------------------------------
     @Test
     @DisplayName("PUT /api/v1/trainers - Success")
     void updateTrainerProfile_Success() throws Exception {
@@ -130,9 +121,6 @@ class TrainerControllerTest {
         verify(trainerService).updateTrainer(any(TrainerUpdateDto.class));
     }
 
-    // ------------------------------------------------------------------------
-    // 4. Get Trainer Trainings List (GET /api/v1/trainers/{username}/trainings)
-    // ------------------------------------------------------------------------
     @Test
     @DisplayName("GET /api/v1/trainers/{username}/trainings - Success")
     void getTrainerTrainings_Success() throws Exception {
@@ -156,9 +144,6 @@ class TrainerControllerTest {
         verify(trainerService).getTrainerTrainings(any());
     }
 
-    // ------------------------------------------------------------------------
-    // 5. Activate/De-Activate Trainer (PATCH /api/v1/trainers/status)
-    // ------------------------------------------------------------------------
     @Test
     @DisplayName("PATCH /api/v1/trainers/status - Success")
     void toggleTrainerStatus_Success() throws Exception {

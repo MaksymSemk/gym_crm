@@ -50,9 +50,6 @@ class TraineeControllerTest {
     @MockitoBean
     private TraineeMapper traineeMapper;
 
-    // ------------------------------------------------------------------------
-    // 0. Trainee Registration (POST /api/v1/trainees)
-    // ------------------------------------------------------------------------
     @Test
     @DisplayName("POST /api/v1/trainees - Success")
     void createTrainee_Success() throws Exception {
@@ -78,7 +75,6 @@ class TraineeControllerTest {
     @Test
     @DisplayName("POST /api/v1/trainees - Validation Error when Required Fields Missing")
     void createTrainee_ValidationError() throws Exception {
-        // Missing required firstName and lastName
         TraineeCreateDto invalidDto = new TraineeCreateDto(
                 "", "", LocalDate.of(1995, 5, 20), "123 Main St"
         );
@@ -89,9 +85,6 @@ class TraineeControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    // ------------------------------------------------------------------------
-    // 1. Get Trainee Profile (GET /api/v1/trainees/{username})
-    // ------------------------------------------------------------------------
     @Test
     @DisplayName("GET /api/v1/trainees/{username} - Success")
     void getTraineeProfile_Success() throws Exception {
@@ -113,9 +106,6 @@ class TraineeControllerTest {
         verify(traineeService).getTraineeByUsername(username);
     }
 
-    // ------------------------------------------------------------------------
-    // 2. Update Trainee Profile (PUT /api/v1/trainees)
-    // ------------------------------------------------------------------------
     @Test
     @DisplayName("PUT /api/v1/trainees - Success")
     void updateTraineeProfile_Success() throws Exception {
@@ -142,7 +132,6 @@ class TraineeControllerTest {
     @Test
     @DisplayName("PUT /api/v1/trainees - Validation Error when Required Fields Missing")
     void updateTraineeProfile_ValidationError() throws Exception {
-        // Missing username and firstName
         TraineeUpdateDto invalidDto = new TraineeUpdateDto(
                 "", "", "Doe", LocalDate.of(1995, 5, 20), "456 St", true
         );
@@ -153,9 +142,6 @@ class TraineeControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    // ------------------------------------------------------------------------
-    // 3. Delete Trainee Profile (DELETE /api/v1/trainees/{username})
-    // ------------------------------------------------------------------------
     @Test
     @DisplayName("DELETE /api/v1/trainees/{username} - Success")
     void deleteTraineeProfile_Success() throws Exception {
@@ -168,9 +154,6 @@ class TraineeControllerTest {
         verify(traineeService).deleteTraineeByUsername(username);
     }
 
-    // ------------------------------------------------------------------------
-    // 4. Get Unassigned Active Trainers (GET /api/v1/trainees/{username}/unassigned-trainers)
-    // ------------------------------------------------------------------------
     @Test
     @DisplayName("GET /api/v1/trainees/{username}/unassigned-trainers - Success")
     void getUnassignedActiveTrainers_Success() throws Exception {
@@ -190,9 +173,6 @@ class TraineeControllerTest {
         verify(traineeService).getUnassignedActiveTrainers(username);
     }
 
-    // ------------------------------------------------------------------------
-    // 5. Update Trainee's Trainer List (PUT /api/v1/trainees/trainers)
-    // ------------------------------------------------------------------------
     @Test
     @DisplayName("PUT /api/v1/trainees/trainers - Success")
     void updateTraineeTrainers_Success() throws Exception {
@@ -215,9 +195,6 @@ class TraineeControllerTest {
         verify(traineeService).updateTraineeTrainers(any(TraineeUpdateTrainersDto.class));
     }
 
-    // ------------------------------------------------------------------------
-    // 6. Get Trainee Trainings List (GET /api/v1/trainees/{username}/trainings)
-    // ------------------------------------------------------------------------
     @Test
     @DisplayName("GET /api/v1/trainees/{username}/trainings - Success with Parameters")
     void getTraineeTrainings_Success() throws Exception {
@@ -243,9 +220,6 @@ class TraineeControllerTest {
         verify(traineeService).getTraineeTrainings(any());
     }
 
-    // ------------------------------------------------------------------------
-    // 7. Activate/De-Activate Trainee (PATCH /api/v1/trainees/status)
-    // ------------------------------------------------------------------------
     @Test
     @DisplayName("PATCH /api/v1/trainees/status - Success")
     void toggleTraineeStatus_Success() throws Exception {

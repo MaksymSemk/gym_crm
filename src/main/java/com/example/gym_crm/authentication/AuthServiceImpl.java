@@ -41,7 +41,6 @@ public class AuthServiceImpl implements AuthService {
         context.setAuthentication(authentication);
         SecurityContextHolder.setContext(context);
 
-        // Bind Spring Security context to HTTP Session
         securityContextRepository.saveContext(context, request, response);
         log.info("User {} successfully authenticated and session created", dto.username());
     }

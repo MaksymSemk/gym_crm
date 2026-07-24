@@ -1,26 +1,39 @@
 package com.example.gym_crm.training.repository;
 
-import com.example.gym_crm.common.repository.CustomCrudRepository;
 import com.example.gym_crm.training.Training;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-public interface TrainingRepository extends CustomCrudRepository<Training, UUID> {
+public interface TrainingRepository extends JpaRepository<Training, UUID> {
 
+    @Query("SELECT t FROM Training t " +
+            "WHERE t.trainer.user.username = :username " +
+            "AND (:fromDate IS NULL OR t.trainingDate >= :fromDate) " +
+            "AND (:toDate IS NULL OR t.trainingDate <= :toDate) " +
+            "AND (:traineeName IS NULL OR :traineeName = '' OR t.trainee.user.username = :traineeName)")
     List<Training> findTrainerTrainingsByCriteria(
-            String username,
-            LocalDate fromDate,
-            LocalDate toDate,
-            String traineeName
+            @Param("username") String username,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate,
+            @Param("traineeName") String traineeName
     );
 
+    @Query("SELECT t FROM Training t " +
+            "WHERE t.trainee.user.username = :username " +
+            "AND (:fromDate IS NULL OR t.trainingDate >= :fromDate) " +
+            "AND (:toDate IS NULL OR t.trainingDate <= :toDate) " +
+            "AND (:trainerName IS NULL OR :trainerName = '' OR t.trainer.user.username = :trainerName) " +
+            "AND (:trainingType IS NULL OR :trainingType = '' OR t.trainingType.name = :trainingType)")
     List<Training> findTraineeTrainingsByCriteria(
-            String username,
-            LocalDate fromDate,
-            LocalDate toDate,
-            String trainerName,
-            String trainingType
+            @Param("username") String username,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate,
+            @Param("trainerName") String trainerName,
+            @Param("trainingType") String trainingType
     );
 }

@@ -285,7 +285,6 @@ public class TraineeServiceImpl implements TraineeService {
 
         log.debug("Fetching unassigned active trainers for trainee: {}", username);
 
-        // Ensure trainee exists before querying; throws EntityDoesNotExistException if missing
         getTraineeByUsername(username);
 
         return trainerRepository.findActiveTrainersNotAssignedToTrainee(username);
