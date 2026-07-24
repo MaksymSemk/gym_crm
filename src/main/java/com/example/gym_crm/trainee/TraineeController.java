@@ -1,9 +1,7 @@
 package com.example.gym_crm.trainee;
 
-import com.example.gym_crm.trainee.Dto.TraineeStatusUpdateDto;
-import com.example.gym_crm.trainee.Dto.TraineeTrainingsSearchDto;
-import com.example.gym_crm.trainee.Dto.TraineeUpdateDto;
-import com.example.gym_crm.trainee.Dto.TraineeUpdateTrainersDto;
+import com.example.gym_crm.trainee.Dto.*;
+import com.example.gym_crm.trainee.Dto.responce.TraineeCreatedResponse;
 import com.example.gym_crm.trainee.Dto.responce.TraineeGetResponse;
 import com.example.gym_crm.trainee.Dto.responce.TraineeTrainingResponse;
 import com.example.gym_crm.trainee.Dto.responce.TrainerGetResponse;
@@ -32,6 +30,17 @@ public class TraineeController {
 
     private final TraineeService traineeService;
     private final TraineeMapper traineeMapper;
+
+    @Operation(summary = "Trainee Registration", description = "Creates a new trainee profile")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Trainee registered successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid payload")
+    })
+    @PostMapping
+    public ResponseEntity<TraineeCreatedResponse> createTrainee(@Valid @RequestBody TraineeCreateDto dto) {
+        Trainee trainee = traineeService.createTrainee(dto);
+        return ResponseEntity.ok(traineeMapper.toTraineeCreatedResponse(trainee));
+    }
 
     @Operation(summary = "Get Trainee Profile", description = "Retrieves trainee details by username")
     @ApiResponses(value = {

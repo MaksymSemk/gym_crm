@@ -1,10 +1,10 @@
 package com.example.gym_crm.trainer.mapper;
 
 import com.example.gym_crm.trainee.Trainee;
-import com.example.gym_crm.trainer.Dto.responce.TraineeInfoDto;
-import com.example.gym_crm.trainer.Dto.responce.TrainerCreatedResponse;
-import com.example.gym_crm.trainer.Dto.responce.TrainerGetResponse;
-import com.example.gym_crm.trainer.Dto.responce.TrainerTrainingResponse;
+import com.example.gym_crm.trainer.Dto.response.TraineeInfoDto;
+import com.example.gym_crm.trainer.Dto.response.TrainerCreatedResponse;
+import com.example.gym_crm.trainer.Dto.response.TrainerGetResponse;
+import com.example.gym_crm.trainer.Dto.response.TrainerTrainingResponse;
 import com.example.gym_crm.trainer.Trainer;
 import com.example.gym_crm.training.Training;
 import org.mapstruct.Mapper;

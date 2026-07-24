@@ -1,8 +1,10 @@
 package com.example.gym_crm.trainee;
 
+import com.example.gym_crm.trainee.Dto.TraineeCreateDto;
 import com.example.gym_crm.trainee.Dto.TraineeStatusUpdateDto;
 import com.example.gym_crm.trainee.Dto.TraineeUpdateDto;
 import com.example.gym_crm.trainee.Dto.TraineeUpdateTrainersDto;
+import com.example.gym_crm.trainee.Dto.responce.TraineeCreatedResponse;
 import com.example.gym_crm.trainee.Dto.responce.TraineeGetResponse;
 import com.example.gym_crm.trainee.Dto.responce.TraineeTrainingResponse;
 import com.example.gym_crm.trainee.Dto.responce.TrainerGetResponse;
@@ -29,10 +31,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -50,6 +49,45 @@ class TraineeControllerTest {
 
     @MockitoBean
     private TraineeMapper traineeMapper;
+
+    // ------------------------------------------------------------------------
+    // 0. Trainee Registration (POST /api/v1/trainees)
+    // ------------------------------------------------------------------------
+    @Test
+    @DisplayName("POST /api/v1/trainees - Success")
+    void createTrainee_Success() throws Exception {
+        TraineeCreateDto createDto = new TraineeCreateDto(
+                "John", "Doe", LocalDate.of(1995, 5, 20), "123 Main St"
+        );
+        Trainee mockTrainee = new Trainee();
+        TraineeCreatedResponse responseDto = new TraineeCreatedResponse("John.Doe", "generatedPass123");
+
+        when(traineeService.createTrainee(any(TraineeCreateDto.class))).thenReturn(mockTrainee);
+        when(traineeMapper.toTraineeCreatedResponse(mockTrainee)).thenReturn(responseDto);
+
+        mockMvc.perform(post("/api/v1/trainees")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value("John.Doe"))
+                .andExpect(jsonPath("$.password").value("generatedPass123"));
+
+        verify(traineeService).createTrainee(any(TraineeCreateDto.class));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/trainees - Validation Error when Required Fields Missing")
+    void createTrainee_ValidationError() throws Exception {
+        // Missing required firstName and lastName
+        TraineeCreateDto invalidDto = new TraineeCreateDto(
+                "", "", LocalDate.of(1995, 5, 20), "123 Main St"
+        );
+
+        mockMvc.perform(post("/api/v1/trainees")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidDto)))
+                .andExpect(status().isBadRequest());
+    }
 
     // ------------------------------------------------------------------------
     // 1. Get Trainee Profile (GET /api/v1/trainees/{username})

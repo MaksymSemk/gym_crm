@@ -1,5 +1,6 @@
 package com.example.gym_crm.trainee.mapper;
 
+import com.example.gym_crm.trainee.Dto.responce.TraineeCreatedResponse;
 import com.example.gym_crm.trainee.Dto.responce.TraineeGetResponse;
 import com.example.gym_crm.trainee.Dto.responce.TrainerGetResponse;
 import com.example.gym_crm.trainee.Dto.responce.TraineeTrainingResponse;
@@ -37,4 +38,9 @@ public abstract class TraineeMapper {
     public abstract TraineeTrainingResponse toTraineeTrainingResponse(Training training);
 
     public abstract List<TraineeTrainingResponse> toTraineeTrainingResponseList(List<Training> trainings);
+
+    @Mapping(target = "username", source = "user.username")
+    @Mapping(target = "password", source = "user.password")
+    public abstract TraineeCreatedResponse toTraineeCreatedResponse(Trainee trainee);
+
 }

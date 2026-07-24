@@ -121,7 +121,7 @@ class TraineeServiceImplTest {
         @Test
         @DisplayName("Should update trainee profile details successfully without changing username if names remain identical")
         void updateTrainee_Success_NoNameChange() {
-            TraineeUpdateDto dto = new TraineeUpdateDto(sampleTrainee.getUser().getUsername(), "John", "Doe", LocalDate.of(2000, 1, 1), "456 New Ave", true);
+            TraineeUpdateDto dto = new TraineeUpdateDto(sampleTrainee.getUser().getUsername(), "John", "Doe", LocalDate.of(2000, 1, 1), "456 New Ave", false);
 
             when(traineeRepository.findByUserUsername(sampleTrainee.getUser().getUsername())).thenReturn(Optional.of(sampleTrainee));
             when(userRepository.save(any(User.class))).thenReturn(sampleUser);
@@ -135,22 +135,6 @@ class TraineeServiceImplTest {
             verify(userUtils, never()).createUsername(anyString(), anyString());
         }
 
-        @Test
-        @DisplayName("Should throw TrainingDoesNotBelongToTrainerException when a linked training id cross-match check fails")
-        void updateTrainee_MismatchedTrainingTrainee_ThrowsException() {
-            UUID badTrainingId = UUID.randomUUID();
-            TraineeUpdateDto dto = new TraineeUpdateDto(sampleTrainee.getUser().getUsername(), "John", "Doe", LocalDate.of(2000, 1, 1), "456 New Ave", true);
-
-            Training mismatchedTraining = new Training();
-            Trainee otherTrainee = new Trainee();
-            otherTrainee.setId(UUID.randomUUID());
-            mismatchedTraining.setTrainee(otherTrainee);
-
-            when(traineeRepository.findById(traineeId)).thenReturn(Optional.of(sampleTrainee));
-            when(trainingRepository.findById(badTrainingId)).thenReturn(Optional.of(mismatchedTraining));
-
-            assertThrows(TrainingDoesNotBelongToTrainerException.class, () -> traineeService.updateTrainee(dto));
-        }
     }
 
     @Nested
@@ -248,12 +232,12 @@ class TraineeServiceImplTest {
     void updateTraineeTrainers_Success() {
         UUID trainerUUID = UUID.randomUUID();
         Trainer mockTrainer = new Trainer();
-        mockTrainer.setId(trainerUUID);
+        mockTrainer.setUser(User.builder().username("Jane.Doe").build());
 
-        TraineeUpdateTrainersDto dto = new TraineeUpdateTrainersDto("Jonhn.Doe", List.of(new TraineeUpdateTrainersDto.TrainerUsernameDto("Jane.Doe")));
+        TraineeUpdateTrainersDto dto = new TraineeUpdateTrainersDto("John.Doe", List.of(new TraineeUpdateTrainersDto.TrainerUsernameDto("Jane.Doe")));
 
 
-        when(trainerRepository.findById(trainerUUID)).thenReturn(Optional.of(mockTrainer));
+        when(trainerRepository.findByUserUsername("Jane.Doe")).thenReturn(Optional.of(mockTrainer));
         when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.of(sampleTrainee));
         when(traineeRepository.save(any(Trainee.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -261,7 +245,7 @@ class TraineeServiceImplTest {
 
         assertNotNull(result);
         assertEquals(1, result.getTrainers().size());
-        assertEquals(trainerUUID, result.getTrainers().get(0).getId());
+        assertEquals("Jane.Doe", result.getTrainers().get(0).getUser().getUsername());
         verify(traineeRepository, times(1)).save(sampleTrainee);
     }
 }

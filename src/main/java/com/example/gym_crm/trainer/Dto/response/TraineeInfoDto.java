@@ -1,4 +1,4 @@
-package com.example.gym_crm.trainer.Dto.responce;
+package com.example.gym_crm.trainer.Dto.response;
 
 public record TraineeInfoDto(
         String username,
