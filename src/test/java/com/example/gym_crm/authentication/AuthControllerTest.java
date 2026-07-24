@@ -39,7 +39,7 @@ class AuthControllerTest {
     void login_Success() throws Exception {
         doNothing().when(authService).login(any(LoginRequestDto.class), any(), any());
 
-        mockMvc.perform(post("/api/v1/auth/login")
+        mockMvc.perform(get("/api/v1/auth/login")
                         .param("username", "john.doe")
                         .param("password", "secret123"))
                 .andExpect(status().isOk());
@@ -50,7 +50,7 @@ class AuthControllerTest {
     @Test
     @DisplayName("GET /api/v1/auth/login - Missing Query Params Returns 400 Bad Request")
     void login_ValidationError() throws Exception {
-        mockMvc.perform(post("/api/v1/auth/login")
+        mockMvc.perform(get("/api/v1/auth/login")
                         .param("username", "")
                         .param("password", ""))
                 .andExpect(status().isBadRequest());

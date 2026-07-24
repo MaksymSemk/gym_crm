@@ -27,7 +27,7 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "Successfully authenticated"),
             @ApiResponse(responseCode = "401", description = "Invalid credentials")
     })
-    @PostMapping("/login")
+    @GetMapping("/login")
     public ResponseEntity<Void> login(
             @Valid @ModelAttribute LoginRequestDto dto,
             HttpServletRequest request,
