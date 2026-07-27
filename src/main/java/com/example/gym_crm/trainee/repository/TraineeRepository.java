@@ -1,6 +1,5 @@
 package com.example.gym_crm.trainee.repository;
 
-import com.example.gym_crm.common.repository.CustomCrudRepository;
 import com.example.gym_crm.trainee.Trainee;
 import org.springframework.data.jpa.repository.JpaRepository;
 

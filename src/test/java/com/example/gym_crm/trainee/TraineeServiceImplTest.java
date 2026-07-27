@@ -16,6 +16,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -246,5 +248,59 @@ class TraineeServiceImplTest {
         assertEquals(1, result.getTrainers().size());
         assertEquals("Jane.Doe", result.getTrainers().get(0).getUser().getUsername());
         verify(traineeRepository, times(1)).save(sampleTrainee);
+    }
+
+    @Nested
+    @DisplayName("Get Unassigned Active Trainers Tests")
+    class GetUnassignedActiveTrainersTests {
+
+        @Test
+        @DisplayName("Should return list of unassigned active trainers when username is valid and trainee exists")
+        void getUnassignedActiveTrainers_Success() {
+            String username = "John.Doe";
+            Trainer activeTrainer = new Trainer();
+            activeTrainer.setUser(User.builder().username("Trainer.One").isActive(true).build());
+
+            when(traineeRepository.findByUserUsername(username)).thenReturn(Optional.of(sampleTrainee));
+            when(trainerRepository.findActiveTrainersNotAssignedToTrainee(username))
+                    .thenReturn(List.of(activeTrainer));
+
+            List<Trainer> results = traineeService.getUnassignedActiveTrainers(username);
+
+            assertNotNull(results);
+            assertEquals(1, results.size());
+            assertEquals("Trainer.One", results.get(0).getUser().getUsername());
+
+            verify(traineeRepository, times(1)).findByUserUsername(username);
+            verify(trainerRepository, times(1)).findActiveTrainersNotAssignedToTrainee(username);
+        }
+
+        @Test
+        @DisplayName("Should throw IllegalArgumentException when username is null")
+        void getUnassignedActiveTrainers_NullUsername_ThrowsException() {
+            assertThrows(IllegalArgumentException.class, () -> traineeService.getUnassignedActiveTrainers(null));
+            verifyNoInteractions(traineeRepository, trainerRepository);
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "   "})
+        @DisplayName("Should throw IllegalArgumentException when username is empty or blank")
+        void getUnassignedActiveTrainers_BlankUsername_ThrowsException(String blankUsername) {
+            assertThrows(IllegalArgumentException.class, () -> traineeService.getUnassignedActiveTrainers(blankUsername));
+            verifyNoInteractions(traineeRepository, trainerRepository);
+        }
+
+        @Test
+        @DisplayName("Should throw EntityDoesNotExistException when trainee username does not exist")
+        void getUnassignedActiveTrainers_TraineeNotFound_ThrowsException() {
+            String nonExistentUsername = "Unknown.User";
+            when(traineeRepository.findByUserUsername(nonExistentUsername)).thenReturn(Optional.empty());
+
+            assertThrows(EntityDoesNotExistException.class,
+                    () -> traineeService.getUnassignedActiveTrainers(nonExistentUsername));
+
+            verify(traineeRepository, times(1)).findByUserUsername(nonExistentUsername);
+            verify(trainerRepository, never()).findActiveTrainersNotAssignedToTrainee(anyString());
+        }
     }
 }
