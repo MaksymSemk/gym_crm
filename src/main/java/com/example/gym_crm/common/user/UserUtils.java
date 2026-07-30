@@ -1,7 +1,5 @@
 package com.example.gym_crm.common.user;
 
-import com.example.gym_crm.trainee.TraineeRepository;
-import com.example.gym_crm.trainer.TrainerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,8 +8,7 @@ import java.security.SecureRandom;
 @Component
 public class UserUtils {
 
-    private TrainerRepository trainerRepository;
-    private TraineeRepository traineeRepository;
+    private UserRepository userRepository;
 
     private static final String CHARACTERS =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}|;:,.<>?";
@@ -19,14 +16,10 @@ public class UserUtils {
     private static final SecureRandom random = new SecureRandom();
 
     @Autowired
-    public void setTrainerRepository(TrainerRepository trainerRepository) {
-        this.trainerRepository = trainerRepository;
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
-    @Autowired
-    public void setTraineeRepository(TraineeRepository traineeRepository) {
-        this.traineeRepository = traineeRepository;
-    }
 
     public String createUsername(String firstName, String lastName) {
         if (firstName == null || lastName == null) {
@@ -37,10 +30,7 @@ public class UserUtils {
         String resultUsername = initialUsername;
         int counter = 1;
 
-        var trainers = trainerRepository.findAll().stream().map(User::getUsername).toList();
-        var trainee = traineeRepository.findAll().stream().map(User::getUsername).toList();
-
-        while (trainers.contains(resultUsername) || trainee.contains(resultUsername)) {
+        while (userRepository.findByUsername(resultUsername).isPresent()) {
             resultUsername = initialUsername + counter;
             counter++;
         }

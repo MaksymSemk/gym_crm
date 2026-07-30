@@ -2,8 +2,10 @@ package com.example.gym_crm.training;
 
 import com.example.gym_crm.training.Dto.TrainingCreateDto;
 
-public interface TrainingService {
+import java.util.UUID;
 
-    Training createTraining(TrainingCreateDto trainingCreateDto);
-    Training getTraining(TrainingId id);
+public interface TrainingService {
+    Training createTraining(TrainingCreateDto dto);
+
+    Training getTraining(UUID id);
 }

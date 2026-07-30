@@ -1,38 +1,41 @@
 package com.example.gym_crm.trainer;
 
-import com.example.gym_crm.common.repository.EntityId;
+import com.example.gym_crm.common.user.User;
+import com.example.gym_crm.trainee.Trainee;
 import com.example.gym_crm.training.Training;
 import com.example.gym_crm.training_type.TrainingType;
-import com.example.gym_crm.common.user.User;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-public class Trainer extends User implements EntityId<UUID> {
+@Builder
+@AllArgsConstructor
+@Entity
+@Table(name = "trainers")
+public class Trainer{
 
-    private Set<TrainingType> specialization;
-    private UUID userId;
-    private Set<Training> trainings;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
 
-    public Trainer(String firstName, String lastName, String username, String password, boolean isActive, Set<TrainingType> specialization) {
-        super(firstName, lastName, username, password, isActive);
-        this.specialization = specialization;
-        this.userId = UUID.randomUUID();
-        this.trainings = new HashSet<>();
-    }
+    @ManyToOne
+    @JoinColumn(name = "training_type_id", nullable = false)
+    private TrainingType specialization;
 
-    @Override
-    public UUID getId() {
-        return userId;
-    }
+    @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Training> trainings;
 
-    @Override
-    public void setId(UUID uuid) {
-        this.userId = uuid;
-    }
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
+
+    @ManyToMany(mappedBy = "trainers")
+    private List<Trainee> trainees;
 }

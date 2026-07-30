@@ -1,22 +1,24 @@
 package com.example.gym_crm.training.Dto;
 
-import com.example.gym_crm.training.TrainingId;
-import com.example.gym_crm.training_type.TrainingType;
+import com.example.gym_crm.authentication.AuthData;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import java.time.LocalDate;
 
-import java.time.LocalTime;
-import java.util.Objects;
-import java.util.Set;
-
-public record TrainingCreateDto(
-        TrainingId trainingId,
-        String trainingName,
-        Set<TrainingType> trainingTypes,
-        LocalTime trainingDuration
-) {
-    public TrainingCreateDto {
-        Objects.requireNonNull(trainingId, "trainingId is required");
-        Objects.requireNonNull(trainingName, "trainingName is required");
-        Objects.requireNonNull(trainingTypes, "trainingTypes is required");
-        Objects.requireNonNull(trainingDuration, "trainingDuration is required");
-    }
+@EqualsAndHashCode(callSuper = true)
+@Data
+public class TrainingCreateDto extends AuthData {
+    @NotBlank(message = "Trainee username is required")
+    private String traineeUsername;
+    @NotBlank(message = "Trainer username is required")
+    private String trainerUsername;
+    @NotBlank(message = "Training name is required")
+    private String trainingName;
+    @NotNull(message = "Training date is required")
+    private LocalDate trainingDate;
+    @NotNull(message = "Training duration is required")
+    private Integer trainingDuration;
 }

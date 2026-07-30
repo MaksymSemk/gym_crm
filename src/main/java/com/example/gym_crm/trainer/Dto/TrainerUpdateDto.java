@@ -1,28 +1,20 @@
 package com.example.gym_crm.trainer.Dto;
 
+import com.example.gym_crm.authentication.AuthData;
 import com.example.gym_crm.common.user.PersonalIdentity;
-import com.example.gym_crm.training.TrainingId;
-import com.example.gym_crm.training_type.TrainingType;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.util.Set;
 import java.util.UUID;
 
-public record TrainerUpdateDto(
-        UUID userId,
-        String firstName,
-        String lastName,
-        Boolean isActive,
-        Set<TrainingType> specialization,
-        Set<TrainingId> trainingIds
-) implements PersonalIdentity
-{
-    @Override
-    public String getFirstName() {
-        return firstName;
-    }
-
-    @Override
-    public String getLastName() {
-        return lastName;
-    }
+@EqualsAndHashCode(callSuper = true)
+@Data
+public class TrainerUpdateDto extends AuthData implements PersonalIdentity {
+    @NotNull(message = "User ID is required")
+    private UUID userId;
+    private String firstName;
+    private String lastName;
+    private Boolean isActive;
+    private Long specializationId;
 }

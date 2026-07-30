@@ -1,17 +1,18 @@
 package com.example.gym_crm.trainer;
 
-import com.example.gym_crm.trainer.Dto.TrainerCreateDto;
-import com.example.gym_crm.trainer.Dto.TrainerUpdateDto;
+import com.example.gym_crm.trainer.Dto.*;
+import com.example.gym_crm.training.Training;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface TrainerService {
-
-    public Trainer getTrainerByID(UUID uuid);
-
-    public Trainer createTrainer(TrainerCreateDto trainerCreateDto);
-
-    public Trainer updateTrainer(TrainerUpdateDto trainerUpdateDto);
-
+    Trainer createTrainer(TrainerCreateDto dto);
+    Trainer getTrainerByUsername(String username);
+    Trainer updateTrainer(TrainerUpdateDto dto);
+    Trainer changePassword(TrainerChangePasswordDto dto);
+    Trainer updateTrainerStatus(String username);
+    List<Training> getTrainerTrainings(TrainerTrainingsSearchDto dto);
+    List<Trainer> getUnassignedTrainersByTraineeUsername(String traineeUsername);
+    Trainer getTrainerByID(UUID uuid);
 }
