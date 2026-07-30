@@ -18,4 +18,9 @@ public interface TrainerRepository extends JpaRepository<Trainer, UUID> {
             "    SELECT t FROM Trainee trainee JOIN trainee.trainers t WHERE trainee.user.username = :username" +
             ")")
     List<Trainer> findActiveTrainersNotAssignedToTrainee(@Param("username") String username);
+
+    @Query(
+            "SELECT COUNT(tr) FROM Trainer tr WHERE tr.user.isActive = true"
+    )
+    Long countByUserIsActiveTrue();
 }
