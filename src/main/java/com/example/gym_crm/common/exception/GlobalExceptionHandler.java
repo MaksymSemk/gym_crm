@@ -1,6 +1,8 @@
 package com.example.gym_crm.common.exception;
 
+import com.example.gym_crm.common.metrics.ApplicationErrorMetrics;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,11 +15,16 @@ import java.util.stream.Collectors;
 
 @ControllerAdvice
 @Slf4j
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final ApplicationErrorMetrics errorMetrics;
 
     @ExceptionHandler(EntityAlreadyExistsException.class)
     public ResponseEntity<ErrorMessage> handleEntityAlreadyExistsException(
             EntityAlreadyExistsException ex, HttpServletRequest request) {
+
+        errorMetrics.recordException(ex.getClass().getSimpleName());
 
         logWarn(request, ex);
         return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -28,6 +35,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorMessage> handleEntityDoesNotExistException(
             EntityDoesNotExistException ex, HttpServletRequest request) {
 
+        errorMetrics.recordException(ex.getClass().getSimpleName());
         logWarn(request, ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorMessage("An error occurred: " + ex.getMessage()));
@@ -36,6 +44,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorMessage> handleBadCredentialsException(
             BadCredentialsException ex, HttpServletRequest request) {
+
+        errorMetrics.recordAuthenticationFailure("bad_credentials");
+        errorMetrics.recordException(ex.getClass().getSimpleName());
 
         log.warn("Authentication failed on [{} {}]: {}",
                 request.getMethod(), request.getRequestURI(), ex.getMessage());
@@ -52,6 +63,8 @@ public class GlobalExceptionHandler {
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .collect(Collectors.joining(", "));
 
+        errorMetrics.recordException(ex.getClass().getSimpleName());
+
         log.warn("Validation failed on [{} {}]: {}",
                 request.getMethod(), request.getRequestURI(), errorDetails);
 
@@ -62,6 +75,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorMessage> handleException(
             Exception ex, HttpServletRequest request) {
+
+        errorMetrics.recordException(ex.getClass().getSimpleName());
 
         log.error("Unhandled Exception processing [{} {}]",
                 request.getMethod(), request.getRequestURI(), ex);
