@@ -1,5 +1,7 @@
 package com.example.gym_crm.trainee;
 
+import com.example.gym_crm.common.config.TestMetricsConfig;
+import com.example.gym_crm.common.metrics.ApplicationErrorMetrics;
 import com.example.gym_crm.trainee.Dto.TraineeCreateDto;
 import com.example.gym_crm.trainee.Dto.TraineeStatusUpdateDto;
 import com.example.gym_crm.trainee.Dto.TraineeUpdateDto;
@@ -13,10 +15,12 @@ import com.example.gym_crm.trainer.Trainer;
 import com.example.gym_crm.training.Training;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,8 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(TraineeController.class)
+@Import(TestMetricsConfig.class)
 class TraineeControllerTest {
 
     @Autowired
@@ -76,7 +80,6 @@ class TraineeControllerTest {
         TraineeCreateDto invalidDto = new TraineeCreateDto(
                 "", "", LocalDate.of(1995, 5, 20), "123 Main St"
         );
-
         mockMvc.perform(post("/api/v1/trainees")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidDto)))
