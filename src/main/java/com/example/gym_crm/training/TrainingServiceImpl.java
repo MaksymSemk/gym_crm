@@ -8,26 +8,20 @@ import com.example.gym_crm.trainer.repository.TrainerRepository;
 import com.example.gym_crm.training.Dto.TrainingCreateDto;
 import com.example.gym_crm.training.repository.TrainingRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class TrainingServiceImpl implements TrainingService {
 
-    private TrainingRepository trainingRepository;
-    private TraineeRepository traineeRepository;
-    private TrainerRepository trainerRepository;
-
-    @Autowired
-    public void setTrainingRepository(TrainingRepository trainingRepository) { this.trainingRepository = trainingRepository; }
-    @Autowired
-    public void setTraineeRepository(TraineeRepository traineeRepository) { this.traineeRepository = traineeRepository; }
-    @Autowired
-    public void setTrainerRepository(TrainerRepository trainerRepository) { this.trainerRepository = trainerRepository; }
+    private final TrainingRepository trainingRepository;
+    private final TraineeRepository traineeRepository;
+    private final TrainerRepository trainerRepository;
 
     @Transactional
     @Override
@@ -35,22 +29,21 @@ public class TrainingServiceImpl implements TrainingService {
         if (dto == null) {
             throw new IllegalArgumentException("Training create DTO cannot be null");
         }
+        log.debug("Processing creation for training name: {}", dto.trainingName());
 
-        log.debug("Processing creation for training name: {}", dto.getTrainingName());
+        Trainee trainee = traineeRepository.findByUserUsername(dto.traineeUsername())
+                .orElseThrow(() -> new EntityDoesNotExistException("Trainee not found with username: " + dto.traineeUsername()));
 
-        Trainee trainee = traineeRepository.findByUserUsername(dto.getTraineeUsername())
-                .orElseThrow(() -> new EntityDoesNotExistException("Trainee not found with username: " + dto.getTraineeUsername()));
-
-        Trainer trainer = trainerRepository.findByUserUsername(dto.getTrainerUsername())
-                .orElseThrow(() -> new EntityDoesNotExistException("Trainer not found with username: " + dto.getTrainerUsername()));
+        Trainer trainer = trainerRepository.findByUserUsername(dto.trainerUsername())
+                .orElseThrow(() -> new EntityDoesNotExistException("Trainer not found with username: " + dto.trainerUsername()));
 
         Training newTraining = Training.builder()
                 .trainee(trainee)
                 .trainer(trainer)
                 .trainingType(trainer.getSpecialization())
-                .trainingName(dto.getTrainingName())
-                .trainingDate(dto.getTrainingDate())
-                .trainingDuration(dto.getTrainingDuration())
+                .trainingName(dto.trainingName())
+                .trainingDate(dto.trainingDate())
+                .trainingDuration(dto.trainingDuration())
                 .build();
 
         Training savedTraining = trainingRepository.save(newTraining);

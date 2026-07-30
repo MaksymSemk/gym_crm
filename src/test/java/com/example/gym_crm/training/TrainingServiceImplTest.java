@@ -79,12 +79,13 @@ class TrainingServiceImplTest {
         @Test
         @DisplayName("Should successfully resolve entities and save new training session")
         void createTraining_Success() {
-            TrainingCreateDto dto = mock(TrainingCreateDto.class);
-            when(dto.getTraineeUsername()).thenReturn("john.trainee");
-            when(dto.getTrainerUsername()).thenReturn("emma.trainer");
-            when(dto.getTrainingName()).thenReturn("Morning Flow");
-            when(dto.getTrainingDate()).thenReturn(LocalDate.now());
-            when(dto.getTrainingDuration()).thenReturn(60);
+            TrainingCreateDto dto = new TrainingCreateDto(
+                    "john.trainee",
+                    "emma.trainer",
+                    "Morning Flow",
+                    LocalDate.now(),
+                    60
+            );
 
             when(traineeRepository.findByUserUsername("john.trainee")).thenReturn(Optional.of(sampleTrainee));
             when(trainerRepository.findByUserUsername("emma.trainer")).thenReturn(Optional.of(sampleTrainer));
@@ -107,8 +108,13 @@ class TrainingServiceImplTest {
         @Test
         @DisplayName("Should throw EntityDoesNotExistException when trainee username lookup fails")
         void createTraining_TraineeNotFound_ThrowsException() {
-            TrainingCreateDto dto = mock(TrainingCreateDto.class);
-            when(dto.getTraineeUsername()).thenReturn("ghost.trainee");
+            TrainingCreateDto dto = new TrainingCreateDto(
+                    "ghost.trainee",
+                    "emma.trainer",
+                    "Morning Flow",
+                    LocalDate.now(),
+                    60
+            );
 
             when(traineeRepository.findByUserUsername("ghost.trainee")).thenReturn(Optional.empty());
 
@@ -119,9 +125,13 @@ class TrainingServiceImplTest {
         @Test
         @DisplayName("Should throw EntityDoesNotExistException when trainer username lookup fails")
         void createTraining_TrainerNotFound_ThrowsException() {
-            TrainingCreateDto dto = mock(TrainingCreateDto.class);
-            when(dto.getTraineeUsername()).thenReturn("john.trainee");
-            when(dto.getTrainerUsername()).thenReturn("ghost.trainer");
+            TrainingCreateDto dto = new TrainingCreateDto(
+                    "john.trainee",
+                    "ghost.trainer",
+                    "Morning Flow",
+                    LocalDate.now(),
+                    60
+            );
 
             when(traineeRepository.findByUserUsername("john.trainee")).thenReturn(Optional.of(sampleTrainee));
             when(trainerRepository.findByUserUsername("ghost.trainer")).thenReturn(Optional.empty());

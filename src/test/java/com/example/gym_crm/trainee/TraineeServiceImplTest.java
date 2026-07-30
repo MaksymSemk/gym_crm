@@ -16,6 +16,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -87,7 +89,7 @@ class TraineeServiceImplTest {
         @Test
         @DisplayName("Should create trainee successfully when inputs are valid")
         void createTrainee_Success() {
-            TraineeCreateDto dto = new TraineeCreateDto("John", "Doe", true, LocalDate.of(2000, 1, 1), "123 Street");
+            TraineeCreateDto dto = new TraineeCreateDto("John", "Doe", LocalDate.of(2000, 1, 1), "123 Street");
 
             when(userUtils.createUsername("John", "Doe")).thenReturn("John.Doe");
             when(userUtils.generatePassword()).thenReturn("generatedPass");
@@ -109,7 +111,7 @@ class TraineeServiceImplTest {
         @Test
         @DisplayName("Should throw IllegalArgumentException when date of birth is in the future")
         void createTrainee_FutureBirthDate_ThrowsException() {
-            TraineeCreateDto dto = new TraineeCreateDto("John", "Doe", true, LocalDate.now().plusDays(5), "123 Street");
+            TraineeCreateDto dto = new TraineeCreateDto("John", "Doe", LocalDate.now().plusDays(5), "123 Street");
             assertThrows(IllegalArgumentException.class, () -> traineeService.createTrainee(dto));
         }
     }
@@ -121,14 +123,9 @@ class TraineeServiceImplTest {
         @Test
         @DisplayName("Should update trainee profile details successfully without changing username if names remain identical")
         void updateTrainee_Success_NoNameChange() {
-            TraineeUpdateDto dto = new TraineeUpdateDto();
-            dto.setUserId(traineeId);
-            dto.setFirstName("John");
-            dto.setLastName("Doe");
-            dto.setIsActive(false);
-            dto.setAddress("456 New Ave");
+            TraineeUpdateDto dto = new TraineeUpdateDto(sampleTrainee.getUser().getUsername(), "John", "Doe", LocalDate.of(2000, 1, 1), "456 New Ave", false);
 
-            when(traineeRepository.findById(traineeId)).thenReturn(Optional.of(sampleTrainee));
+            when(traineeRepository.findByUserUsername(sampleTrainee.getUser().getUsername())).thenReturn(Optional.of(sampleTrainee));
             when(userRepository.save(any(User.class))).thenReturn(sampleUser);
             when(traineeRepository.save(any(Trainee.class))).thenReturn(sampleTrainee);
 
@@ -140,24 +137,6 @@ class TraineeServiceImplTest {
             verify(userUtils, never()).createUsername(anyString(), anyString());
         }
 
-        @Test
-        @DisplayName("Should throw TrainingDoesNotBelongToTrainerException when a linked training id cross-match check fails")
-        void updateTrainee_MismatchedTrainingTrainee_ThrowsException() {
-            UUID badTrainingId = UUID.randomUUID();
-            TraineeUpdateDto dto = new TraineeUpdateDto();
-            dto.setUserId(traineeId);
-            dto.setTraining_ids(List.of(badTrainingId));
-
-            Training mismatchedTraining = new Training();
-            Trainee otherTrainee = new Trainee();
-            otherTrainee.setId(UUID.randomUUID());
-            mismatchedTraining.setTrainee(otherTrainee);
-
-            when(traineeRepository.findById(traineeId)).thenReturn(Optional.of(sampleTrainee));
-            when(trainingRepository.findById(badTrainingId)).thenReturn(Optional.of(mismatchedTraining));
-
-            assertThrows(TrainingDoesNotBelongToTrainerException.class, () -> traineeService.updateTrainee(dto));
-        }
     }
 
     @Nested
@@ -204,7 +183,7 @@ class TraineeServiceImplTest {
         void updateTraineeStatus_Success() {
             when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.of(sampleTrainee));
 
-            Trainee result = traineeService.updateTraineeStatus("John.Doe");
+            Trainee result = traineeService.updateTraineeStatus("John.Doe", false);
 
             assertFalse(result.getUser().getIsActive());
             verify(userRepository, times(1)).save(sampleUser);
@@ -253,15 +232,13 @@ class TraineeServiceImplTest {
     @Test
     @DisplayName("Should cleanly replace trainee coach tracking associations when given valid trainer re-assignment DTO")
     void updateTraineeTrainers_Success() {
-        UUID trainerUUID = UUID.randomUUID();
         Trainer mockTrainer = new Trainer();
-        mockTrainer.setId(trainerUUID);
+        mockTrainer.setUser(User.builder().username("Jane.Doe").build());
 
-        TraineeUpdateTrainersDto dto = new TraineeUpdateTrainersDto();
-        dto.setUsername("John.Doe");
-        dto.setTrainerIds(List.of(trainerUUID));
+        TraineeUpdateTrainersDto dto = new TraineeUpdateTrainersDto("John.Doe", List.of(new TraineeUpdateTrainersDto.TrainerUsernameDto("Jane.Doe")));
 
-        when(trainerRepository.findById(trainerUUID)).thenReturn(Optional.of(mockTrainer));
+
+        when(trainerRepository.findByUserUsername("Jane.Doe")).thenReturn(Optional.of(mockTrainer));
         when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.of(sampleTrainee));
         when(traineeRepository.save(any(Trainee.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -269,7 +246,61 @@ class TraineeServiceImplTest {
 
         assertNotNull(result);
         assertEquals(1, result.getTrainers().size());
-        assertEquals(trainerUUID, result.getTrainers().get(0).getId());
+        assertEquals("Jane.Doe", result.getTrainers().get(0).getUser().getUsername());
         verify(traineeRepository, times(1)).save(sampleTrainee);
+    }
+
+    @Nested
+    @DisplayName("Get Unassigned Active Trainers Tests")
+    class GetUnassignedActiveTrainersTests {
+
+        @Test
+        @DisplayName("Should return list of unassigned active trainers when username is valid and trainee exists")
+        void getUnassignedActiveTrainers_Success() {
+            String username = "John.Doe";
+            Trainer activeTrainer = new Trainer();
+            activeTrainer.setUser(User.builder().username("Trainer.One").isActive(true).build());
+
+            when(traineeRepository.findByUserUsername(username)).thenReturn(Optional.of(sampleTrainee));
+            when(trainerRepository.findActiveTrainersNotAssignedToTrainee(username))
+                    .thenReturn(List.of(activeTrainer));
+
+            List<Trainer> results = traineeService.getUnassignedActiveTrainers(username);
+
+            assertNotNull(results);
+            assertEquals(1, results.size());
+            assertEquals("Trainer.One", results.get(0).getUser().getUsername());
+
+            verify(traineeRepository, times(1)).findByUserUsername(username);
+            verify(trainerRepository, times(1)).findActiveTrainersNotAssignedToTrainee(username);
+        }
+
+        @Test
+        @DisplayName("Should throw IllegalArgumentException when username is null")
+        void getUnassignedActiveTrainers_NullUsername_ThrowsException() {
+            assertThrows(IllegalArgumentException.class, () -> traineeService.getUnassignedActiveTrainers(null));
+            verifyNoInteractions(traineeRepository, trainerRepository);
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "   "})
+        @DisplayName("Should throw IllegalArgumentException when username is empty or blank")
+        void getUnassignedActiveTrainers_BlankUsername_ThrowsException(String blankUsername) {
+            assertThrows(IllegalArgumentException.class, () -> traineeService.getUnassignedActiveTrainers(blankUsername));
+            verifyNoInteractions(traineeRepository, trainerRepository);
+        }
+
+        @Test
+        @DisplayName("Should throw EntityDoesNotExistException when trainee username does not exist")
+        void getUnassignedActiveTrainers_TraineeNotFound_ThrowsException() {
+            String nonExistentUsername = "Unknown.User";
+            when(traineeRepository.findByUserUsername(nonExistentUsername)).thenReturn(Optional.empty());
+
+            assertThrows(EntityDoesNotExistException.class,
+                    () -> traineeService.getUnassignedActiveTrainers(nonExistentUsername));
+
+            verify(traineeRepository, times(1)).findByUserUsername(nonExistentUsername);
+            verify(trainerRepository, never()).findActiveTrainersNotAssignedToTrainee(anyString());
+        }
     }
 }

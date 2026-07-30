@@ -11,7 +11,7 @@ public interface TrainerService {
     Trainer getTrainerByUsername(String username);
     Trainer updateTrainer(TrainerUpdateDto dto);
     Trainer changePassword(TrainerChangePasswordDto dto);
-    Trainer updateTrainerStatus(String username);
+    Trainer updateTrainerStatus(String username, Boolean newStatus);
     List<Training> getTrainerTrainings(TrainerTrainingsSearchDto dto);
     List<Trainer> getUnassignedTrainersByTraineeUsername(String traineeUsername);
     Trainer getTrainerByID(UUID uuid);

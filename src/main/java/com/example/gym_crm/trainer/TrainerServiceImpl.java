@@ -1,6 +1,7 @@
 package com.example.gym_crm.trainer;
 
 import com.example.gym_crm.common.exception.EntityDoesNotExistException;
+import com.example.gym_crm.common.user.PersonalIdentity;
 import com.example.gym_crm.common.user.User;
 import com.example.gym_crm.common.user.UserRepository;
 import com.example.gym_crm.common.user.UserUtils;
@@ -63,7 +64,7 @@ public class TrainerServiceImpl implements TrainerService {
                 .lastName(dto.lastName())
                 .username(username)
                 .password(password)
-                .isActive(dto.isActive())
+                .isActive(true)
                 .build();
 
         Trainer newTrainer = Trainer.builder()
@@ -90,28 +91,22 @@ public class TrainerServiceImpl implements TrainerService {
     @Transactional
     @Override
     public Trainer updateTrainer(TrainerUpdateDto dto) {
-        if (dto == null || dto.getUserId() == null) {
+        if (dto == null || dto.username() == null) {
             throw new IllegalArgumentException("Invalid update parameters");
         }
 
-        log.debug("Updating trainer profile for ID: {}", dto.getUserId());
-        Trainer trainer = trainerRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new EntityDoesNotExistException("Trainer not found"));
+        log.debug("Updating trainer profile for username: {}", dto.username());
+
+        Trainer trainer = trainerRepository.findByUserUsername(dto.username())
+                .orElseThrow(() -> new EntityDoesNotExistException("Trainer not found with username: " + dto.username()));
 
         User user = trainer.getUser();
-        boolean updatedIdentity = user.updateIdentity(dto);
-        if (updatedIdentity) {
-            user.setUsername(userUtils.createUsername(user.getFirstName(), user.getLastName()));
-        }
 
-        if (dto.getIsActive() != null) {
-            user.setIsActive(dto.getIsActive());
-        }
+        user.setFirstName(dto.firstName());
+        user.setLastName(dto.lastName());
 
-        if (dto.getSpecializationId() != null) {
-            TrainingType specialization = trainingTypeRepository.findById(dto.getSpecializationId())
-                    .orElseThrow(() -> new EntityDoesNotExistException("Specialization not found"));
-            trainer.setSpecialization(specialization);
+        if (dto.isActive() != null) {
+            user.setIsActive(dto.isActive());
         }
 
         userRepository.save(user);
@@ -133,14 +128,26 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Transactional
     @Override
-    public Trainer updateTrainerStatus(String username) {
+    public Trainer updateTrainerStatus(String username, Boolean isActive) {
+        if (username == null || username.isBlank() || isActive == null) {
+            throw new IllegalArgumentException("Username and active status must be provided");
+        }
+
         Trainer trainer = getTrainerByUsername(username);
         User user = trainer.getUser();
-        user.setIsActive(!user.getIsActive());
+
+        if (user.getIsActive().equals(isActive)) {
+            throw new IllegalArgumentException(
+                    String.format("Trainer '%s' is already in active status: %b. Action is non-idempotent.", username, isActive)
+            );
+        }
+
+        user.setIsActive(isActive);
         userRepository.save(user);
-        log.debug("Trainer status updated for: {}", username);
+        log.debug("Trainer {} status changed to {}", username, isActive);
         return trainer;
     }
+
 
     @Transactional
     @Override
@@ -157,7 +164,7 @@ public class TrainerServiceImpl implements TrainerService {
         if (traineeUsername == null || traineeUsername.isBlank()) {
             throw new IllegalArgumentException("Trainee username cannot be empty");
         }
-        return trainerRepository.findTrainersNotAssignedToTrainee(traineeUsername);
+        return trainerRepository.findActiveTrainersNotAssignedToTrainee(traineeUsername);
     }
 
     @Override
