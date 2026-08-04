@@ -35,6 +35,10 @@ public class User {
     @Column(nullable = false)
     private Boolean isActive;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
     public boolean updateIdentity(PersonalIdentity identity) {
         boolean updated = false;
 

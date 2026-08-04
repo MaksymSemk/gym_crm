@@ -1,10 +1,7 @@
 package com.example.gym_crm.trainer;
 
 import com.example.gym_crm.common.exception.EntityDoesNotExistException;
-import com.example.gym_crm.common.user.PersonalIdentity;
-import com.example.gym_crm.common.user.User;
-import com.example.gym_crm.common.user.UserRepository;
-import com.example.gym_crm.common.user.UserUtils;
+import com.example.gym_crm.common.user.*;
 import com.example.gym_crm.trainer.Dto.TrainerChangePasswordDto;
 import com.example.gym_crm.trainer.Dto.TrainerCreateDto;
 import com.example.gym_crm.trainer.Dto.TrainerTrainingsSearchDto;
@@ -65,6 +62,7 @@ public class TrainerServiceImpl implements TrainerService {
                 .username(username)
                 .password(password)
                 .isActive(true)
+                .role(Role.TRAINER)
                 .build();
 
         Trainer newTrainer = Trainer.builder()

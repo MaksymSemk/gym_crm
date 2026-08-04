@@ -7,12 +7,12 @@ INSERT INTO training_types (id, name) VALUES
                                           (5, 'Cardio');
 
 -- 2. Populate users (Shared entity for Trainers and Trainees)
-INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES
-                                                                                 ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'John', 'Doe', 'John.Doe', 'pass123!', true),
-                                                                                 ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'Jane', 'Smith', 'Jane.Smith', 'secure456!', true),
-                                                                                 ('b1eebc99-9c0b-4ef8-bb6d-6bb9bd380b11', 'Alex', 'Turner', 'Alex.Turner', 'trainer1!', true),
-                                                                                 ('b1eebc99-9c0b-4ef8-bb6d-6bb9bd380b12', 'Emma', 'Watson', 'Emma.Watson', 'trainer2!', true),
-                                                                                 ('b1eebc99-9c0b-4ef8-bb6d-6bb9bd380b13', 'Bruce', 'Wayne', 'Bruce.Wayne', 'batman007', false);
+INSERT INTO users (id, first_name, last_name, username, password, is_active, role) VALUES
+                                                                                 ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'John', 'Doe', 'John.Doe', 'pass123!', true, 'TRAINEE'),
+                                                                                 ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'Jane', 'Smith', 'Jane.Smith', 'secure456!', true, 'TRAINEE'),
+                                                                                 ('b1eebc99-9c0b-4ef8-bb6d-6bb9bd380b11', 'Alex', 'Turner', 'Alex.Turner', 'trainer1!', true, 'TRAINER'),
+                                                                                 ('b1eebc99-9c0b-4ef8-bb6d-6bb9bd380b12', 'Emma', 'Watson', 'Emma.Watson', 'trainer2!', true, 'TRAINER'),
+                                                                                 ('b1eebc99-9c0b-4ef8-bb6d-6bb9bd380b13', 'Bruce', 'Wayne', 'Bruce.Wayne', 'batman007', false, 'TRAINER');
 
 -- 3. Populate trainers
 INSERT INTO trainers (id, user_id, training_type_id) VALUES
