@@ -47,6 +47,10 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3")
 
     implementation("org.springframework.boot:spring-boot-starter-security:4.1.0")
+
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("io.micrometer:micrometer-registry-prometheus")
+
 }
 
 tasks.withType<Test> {
