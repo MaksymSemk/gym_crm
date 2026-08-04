@@ -6,6 +6,7 @@ import com.example.gym_crm.trainer.Dto.TrainerChangePasswordDto;
 import com.example.gym_crm.trainer.Dto.TrainerCreateDto;
 import com.example.gym_crm.trainer.Dto.TrainerTrainingsSearchDto;
 import com.example.gym_crm.trainer.Dto.TrainerUpdateDto;
+import com.example.gym_crm.trainer.Dto.response.TrainerCreatedResponse;
 import com.example.gym_crm.trainer.repository.TrainerRepository;
 import com.example.gym_crm.training.Training;
 import com.example.gym_crm.training.repository.TrainingRepository;
@@ -14,6 +15,7 @@ import com.example.gym_crm.training_type.repository.TrainingTypeRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -29,6 +31,7 @@ public class TrainerServiceImpl implements TrainerService {
     private TrainingRepository trainingRepository;
     private TrainingTypeRepository trainingTypeRepository;
     private UserUtils userUtils;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     public void setTrainerRepository(TrainerRepository trainerRepository) { this.trainerRepository = trainerRepository; }
@@ -40,10 +43,12 @@ public class TrainerServiceImpl implements TrainerService {
     public void setTrainingTypeRepository(TrainingTypeRepository trainingTypeRepository) { this.trainingTypeRepository = trainingTypeRepository; }
     @Autowired
     public void setUserUtils(UserUtils userUtils) { this.userUtils = userUtils; }
+    @Autowired
+    public void setPasswordEncoder(PasswordEncoder passwordEncoder) { this.passwordEncoder = passwordEncoder; }
 
     @Transactional
     @Override
-    public Trainer createTrainer(TrainerCreateDto dto) {
+    public TrainerCreatedResponse createTrainer(TrainerCreateDto dto) {
         if (dto == null) {
             throw new IllegalArgumentException("Trainer create DTO cannot be null");
         }
@@ -60,7 +65,7 @@ public class TrainerServiceImpl implements TrainerService {
                 .firstName(dto.firstName())
                 .lastName(dto.lastName())
                 .username(username)
-                .password(password)
+                .password(passwordEncoder.encode(password))
                 .isActive(true)
                 .role(Role.TRAINER)
                 .build();
@@ -72,7 +77,8 @@ public class TrainerServiceImpl implements TrainerService {
                 .trainees(new ArrayList<>())
                 .build();
 
-        return trainerRepository.save(newTrainer);
+        var savedTrainer = trainerRepository.save(newTrainer);
+        return new TrainerCreatedResponse(savedTrainer.getUser().getUsername(), password);
     }
 
     @Transactional
@@ -118,7 +124,7 @@ public class TrainerServiceImpl implements TrainerService {
             throw new IllegalArgumentException("Password cannot be blank");
         }
         Trainer trainer = getTrainerByUsername(dto.getUsername());
-        trainer.getUser().setPassword(dto.getNewPassword());
+        trainer.getUser().setPassword(passwordEncoder.encode(dto.getNewPassword()));
         userRepository.save(trainer.getUser());
         log.warn("Password changed for trainer: {}", dto.getUsername());
         return trainer;

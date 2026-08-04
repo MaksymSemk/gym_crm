@@ -58,11 +58,9 @@ class TraineeControllerTest {
         TraineeCreateDto createDto = new TraineeCreateDto(
                 "John", "Doe", LocalDate.of(1995, 5, 20), "123 Main St"
         );
-        Trainee mockTrainee = new Trainee();
-        TraineeCreatedResponse responseDto = new TraineeCreatedResponse("John.Doe", "generatedPass123");
+        TraineeCreatedResponse mockTrainee = new TraineeCreatedResponse("John.Doe", "generatedPass123");
 
         when(traineeService.createTrainee(any(TraineeCreateDto.class))).thenReturn(mockTrainee);
-        when(traineeMapper.toTraineeCreatedResponse(mockTrainee)).thenReturn(responseDto);
 
         mockMvc.perform(post("/api/v1/trainees")
                         .contentType(MediaType.APPLICATION_JSON)

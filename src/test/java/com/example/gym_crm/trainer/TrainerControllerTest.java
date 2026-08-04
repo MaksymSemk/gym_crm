@@ -55,11 +55,9 @@ class TrainerControllerTest {
     @DisplayName("POST /api/v1/trainers - Success")
     void registerTrainer_Success() throws Exception {
         TrainerCreateDto createDto = new TrainerCreateDto("Alice", "Smith", 1L);
-        Trainer mockTrainer = new Trainer();
-        TrainerCreatedResponse responseDto = new TrainerCreatedResponse("Alice.Smith", "pass123");
+        TrainerCreatedResponse mockTrainer = new TrainerCreatedResponse("Alice.Smith", "pass123");
 
         when(trainerService.createTrainer(any(TrainerCreateDto.class))).thenReturn(mockTrainer);
-        when(trainerMapper.toTrainerCreatedResponse(mockTrainer)).thenReturn(responseDto);
 
         mockMvc.perform(post("/api/v1/trainers")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -39,8 +39,7 @@ public class TrainerController {
     })
     @PostMapping
     public ResponseEntity<TrainerCreatedResponse> registerTrainer(@Valid @RequestBody TrainerCreateDto dto) {
-        Trainer createdTrainer = trainerService.createTrainer(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(trainerMapper.toTrainerCreatedResponse(createdTrainer));
+        return ResponseEntity.status(HttpStatus.CREATED).body(trainerService.createTrainer(dto));
     }
 
     @Operation(summary = "Get Trainer Profile", description = "Retrieves trainer details by username")

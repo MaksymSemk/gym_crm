@@ -2,9 +2,11 @@ package com.example.gym_crm.application;
 
 import com.example.gym_crm.authentication.AuthData;
 import com.example.gym_crm.trainee.Dto.*;
+import com.example.gym_crm.trainee.Dto.responce.TraineeCreatedResponse;
 import com.example.gym_crm.trainee.Trainee;
 import com.example.gym_crm.trainee.TraineeService;
 import com.example.gym_crm.trainer.Dto.*;
+import com.example.gym_crm.trainer.Dto.response.TrainerCreatedResponse;
 import com.example.gym_crm.trainer.Trainer;
 import com.example.gym_crm.trainer.TrainerService;
 import com.example.gym_crm.training.Dto.TrainingCreateDto;
@@ -26,7 +28,7 @@ public class GymFacade {
     private final TrainingService trainingService;
 
     // TRAINEE
-    public Trainee createTrainee(@Valid TraineeCreateDto dto) {
+    public TraineeCreatedResponse createTrainee(@Valid TraineeCreateDto dto) {
         return traineeService.createTrainee(dto);
     }
 
@@ -67,7 +69,7 @@ public class GymFacade {
     }
 
     // TRAINER
-    public Trainer createTrainer(@Valid TrainerCreateDto dto) {
+    public TrainerCreatedResponse createTrainer(@Valid TrainerCreateDto dto) {
         return trainerService.createTrainer(dto);
     }
 

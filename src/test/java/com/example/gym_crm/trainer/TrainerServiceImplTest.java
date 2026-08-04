@@ -8,6 +8,7 @@ import com.example.gym_crm.trainer.Dto.TrainerChangePasswordDto;
 import com.example.gym_crm.trainer.Dto.TrainerCreateDto;
 import com.example.gym_crm.trainer.Dto.TrainerTrainingsSearchDto;
 import com.example.gym_crm.trainer.Dto.TrainerUpdateDto;
+import com.example.gym_crm.trainer.Dto.response.TrainerCreatedResponse;
 import com.example.gym_crm.trainer.repository.TrainerRepository;
 import com.example.gym_crm.training.Training;
 import com.example.gym_crm.training.repository.TrainingRepository;
@@ -20,7 +21,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -37,6 +41,9 @@ class TrainerServiceImplTest {
 
     @InjectMocks
     private TrainerServiceImpl trainerService;
+
+    @Spy
+    private PasswordEncoder passwordEncoder = NoOpPasswordEncoder.getInstance();
 
     @Mock
     private TrainerRepository trainerRepository;
@@ -100,10 +107,10 @@ class TrainerServiceImplTest {
             when(userUtils.generatePassword()).thenReturn("pass123");
             when(trainerRepository.save(any(Trainer.class))).thenReturn(sampleTrainer);
 
-            Trainer result = trainerService.createTrainer(dto);
+            TrainerCreatedResponse result = trainerService.createTrainer(dto);
 
             assertNotNull(result);
-            assertEquals("Alex.Turner", result.getUser().getUsername());
+            assertEquals("Alex.Turner", result.username());
             verify(trainerRepository, times(1)).save(any(Trainer.class));
         }
 
