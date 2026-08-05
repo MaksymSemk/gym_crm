@@ -3,6 +3,7 @@ package com.example.gym_crm.authentication;
 import com.example.gym_crm.authentication.dto.ChangePasswordRequestDto;
 import com.example.gym_crm.authentication.dto.LoginRequestDto;
 import com.example.gym_crm.common.exception.EntityDoesNotExistException;
+import com.example.gym_crm.common.rate_limiting.LoginRateLimitFilter;
 import com.example.gym_crm.common.user.User;
 import com.example.gym_crm.common.user.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
