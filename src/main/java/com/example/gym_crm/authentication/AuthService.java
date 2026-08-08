@@ -9,4 +9,5 @@ import jakarta.servlet.http.HttpServletResponse;
 public interface AuthService {
     AuthResponseDto login(LoginRequestDto dto);
     void changePassword(ChangePasswordRequestDto dto);
+    void logout(HttpServletRequest request);
 }

@@ -5,6 +5,7 @@ import com.example.gym_crm.authentication.dto.ChangePasswordRequestDto;
 import com.example.gym_crm.authentication.dto.LoginRequestDto;
 import com.example.gym_crm.common.exception.EntityDoesNotExistException;
 import com.example.gym_crm.common.rate_limiting.LoginRateLimitFilter;
+import com.example.gym_crm.common.security.jwt.JwtBlacklistService;
 import com.example.gym_crm.common.security.jwt.JwtUtils;
 import com.example.gym_crm.common.user.User;
 import com.example.gym_crm.common.user.UserRepository;
@@ -30,10 +31,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthServiceImpl implements AuthService {
 
     private final AuthenticationManager authenticationManager;
-    private final SecurityContextRepository securityContextRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
+    private final JwtBlacklistService blacklistService;
+
 
     @Override
     public AuthResponseDto login(LoginRequestDto dto) {
@@ -65,5 +67,16 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(dto.newPassword()));
         userRepository.save(user);
         log.info("Password successfully updated for user: {}", dto.username());
+    }
+
+
+    public void logout(HttpServletRequest request) {
+        log.debug("Logging out user and invalidating session");
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            blacklistService.blacklistToken(token);
+        }
+        SecurityContextHolder.clearContext();
     }
 }
