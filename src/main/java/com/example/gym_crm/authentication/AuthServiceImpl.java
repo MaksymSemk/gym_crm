@@ -1,9 +1,11 @@
 package com.example.gym_crm.authentication;
 
+import com.example.gym_crm.authentication.dto.AuthResponseDto;
 import com.example.gym_crm.authentication.dto.ChangePasswordRequestDto;
 import com.example.gym_crm.authentication.dto.LoginRequestDto;
 import com.example.gym_crm.common.exception.EntityDoesNotExistException;
 import com.example.gym_crm.common.rate_limiting.LoginRateLimitFilter;
+import com.example.gym_crm.common.security.jwt.JwtUtils;
 import com.example.gym_crm.common.user.User;
 import com.example.gym_crm.common.user.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +18,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
@@ -30,20 +33,21 @@ public class AuthServiceImpl implements AuthService {
     private final SecurityContextRepository securityContextRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils;
 
     @Override
-    public void login(LoginRequestDto dto, HttpServletRequest request, HttpServletResponse response) {
+    public AuthResponseDto login(LoginRequestDto dto) {
         log.debug("Attempting session login for user: {}", dto.username());
 
         Authentication authRequest = new UsernamePasswordAuthenticationToken(dto.username(), dto.password());
         Authentication authentication = authenticationManager.authenticate(authRequest);
 
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(authentication);
-        SecurityContextHolder.setContext(context);
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        assert userDetails != null;
+        String token = jwtUtils.generateToken(userDetails);
 
-        securityContextRepository.saveContext(context, request, response);
         log.info("User {} successfully authenticated and session created", dto.username());
+        return new AuthResponseDto(dto.username(), token);
     }
 
     @Transactional
