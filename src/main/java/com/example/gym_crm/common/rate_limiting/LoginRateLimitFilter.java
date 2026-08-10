@@ -1,6 +1,5 @@
 package com.example.gym_crm.common.rate_limiting;
 
-import com.example.gym_crm.common.get_ip.GetIpService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +23,6 @@ public class LoginRateLimitFilter extends OncePerRequestFilter {
     private static final int MAX_FAILED_ATTEMPTS = 5;
     private static final long LOCKOUT_DURATION_MS = 300_000; // 5 minutes
 
-    private final GetIpService getIpService;
     private final Map<String, LoginAttempt> attemptsMap = new ConcurrentHashMap<>();
 
     private static class LoginAttempt {
@@ -55,17 +53,19 @@ public class LoginRateLimitFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String clientIp = getIpService.getRemoteIP(request);
+        String username = request.getParameter("username");
+
+        String usernameKey = (username != null) ? username.trim().toLowerCase() : "anonymous";
         long now = System.currentTimeMillis();
 
-        LoginAttempt attempt = attemptsMap.get(clientIp);
+        LoginAttempt attempt = attemptsMap.get(usernameKey);
         if (attempt != null) {
             if (now - attempt.lastAttemptTime >= LOCKOUT_DURATION_MS) {
-                log.debug("Lockout duration expired for IP {}. Resetting attempt counter.", clientIp);
-                attemptsMap.remove(clientIp);
+                log.debug("Lockout duration expired for user {}. Resetting attempt counter.", usernameKey);
+                attemptsMap.remove(usernameKey);
             } else if (attempt.count >= MAX_FAILED_ATTEMPTS) {
-                log.warn("Rate limit exceeded for IP {}. Request blocked (Attempt {}/{}).",
-                        clientIp, attempt.count, MAX_FAILED_ATTEMPTS);
+                log.warn("Rate limit exceeded for user {}. Request blocked (Attempt {}/{}).",
+                        usernameKey, attempt.count, MAX_FAILED_ATTEMPTS);
                 response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
                 response.setContentType("application/json");
                 response.getWriter().write("""
@@ -78,17 +78,17 @@ public class LoginRateLimitFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
 
         if (response.getStatus() == HttpStatus.UNAUTHORIZED.value()) {
-            attemptsMap.compute(clientIp, (key, existing) -> {
+            attemptsMap.compute(usernameKey, (key, existing) -> {
                 if (existing == null || (now - existing.lastAttemptTime >= LOCKOUT_DURATION_MS)) {
-                    log.debug("First failed login attempt registered for IP {}", clientIp);
+                    log.debug("First failed login attempt registered for user {}", usernameKey);
                     return new LoginAttempt(now);
                 }
                 existing.increment(now);
-                log.debug("Incremented failed login attempt for IP {}: count={}", clientIp, existing.count);
+                log.debug("Incremented failed login attempt for user {}: count={}", usernameKey, existing.count);
                 return existing;
             });
         } else if (response.getStatus() == HttpStatus.OK.value()) {
-            attemptsMap.remove(clientIp);
+            attemptsMap.remove(usernameKey);
         }
     }
 }
