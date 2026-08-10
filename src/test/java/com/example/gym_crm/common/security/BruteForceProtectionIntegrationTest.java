@@ -1,5 +1,6 @@
 package com.example.gym_crm.common.security;
 
+import com.example.gym_crm.common.BaseRepositoryTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class BruteForceProtectionIntegrationTest {
+class BruteForceProtectionIntegrationTest extends BaseRepositoryTest {
 
     @Autowired
     private MockMvc mockMvc;

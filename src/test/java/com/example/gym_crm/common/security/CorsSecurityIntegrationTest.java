@@ -1,5 +1,6 @@
 package com.example.gym_crm.common.security;
 
+import com.example.gym_crm.common.BaseRepositoryTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,7 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class CorsSecurityIntegrationTest {
+class CorsSecurityIntegrationTest extends BaseRepositoryTest {
 
     @Autowired
     private MockMvc mockMvc;
