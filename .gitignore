@@ -35,4 +35,4 @@ out/
 
 ### VS Code ###
 .vscode/
-/src/test/java/com/example/gym_crm/PasswordHashTest.java
+core-service/src/test/java/com/example/gym_crm/PasswordHashTest.java
