@@ -38,8 +38,7 @@ public class TraineeController {
     })
     @PostMapping
     public ResponseEntity<TraineeCreatedResponse> createTrainee(@Valid @RequestBody TraineeCreateDto dto) {
-        Trainee trainee = traineeService.createTrainee(dto);
-        return ResponseEntity.ok(traineeMapper.toTraineeCreatedResponse(trainee));
+        return ResponseEntity.ok(traineeService.createTrainee(dto));
     }
 
     @Operation(summary = "Get Trainee Profile", description = "Retrieves trainee details by username")

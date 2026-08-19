@@ -1,5 +1,6 @@
 package com.example.gym_crm.training;
 
+import com.example.gym_crm.common.BaseControllerTest;
 import com.example.gym_crm.common.config.TestMetricsConfig;
 import com.example.gym_crm.training.Dto.TrainingCreateDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -22,8 +24,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(TrainingController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @Import(TestMetricsConfig.class)
-class TrainingControllerTest {
+class TrainingControllerTest extends BaseControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

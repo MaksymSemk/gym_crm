@@ -1,5 +1,6 @@
 package com.example.gym_crm.authentication;
 
+import com.example.gym_crm.authentication.dto.AuthResponseDto;
 import com.example.gym_crm.authentication.dto.ChangePasswordRequestDto;
 import com.example.gym_crm.authentication.dto.LoginRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/v1/auth")
@@ -28,13 +31,11 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "Invalid credentials")
     })
     @GetMapping("/login")
-    public ResponseEntity<Void> login(
-            @Valid @ModelAttribute LoginRequestDto dto,
-            HttpServletRequest request,
-            HttpServletResponse response
+    public ResponseEntity<AuthResponseDto> login(
+            @Valid @ModelAttribute LoginRequestDto dto
     ) {
-        authService.login(dto, request, response);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        AuthResponseDto response = authService.login(dto);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @Operation(summary = "Change Login / Password", description = "Updates user password")
@@ -47,5 +48,12 @@ public class AuthController {
     public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequestDto dto) {
         authService.changePassword(dto);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @Operation(summary = "Log out", description = "Invalidates the current session and logs out the user")
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout(HttpServletRequest request) {
+        authService.logout(request);
+        return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
     }
 }

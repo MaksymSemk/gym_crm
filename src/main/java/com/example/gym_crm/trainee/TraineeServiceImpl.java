@@ -1,11 +1,9 @@
 package com.example.gym_crm.trainee;
 
 import com.example.gym_crm.common.exception.EntityDoesNotExistException;
-import com.example.gym_crm.common.user.PersonalIdentity;
-import com.example.gym_crm.common.user.User;
-import com.example.gym_crm.common.user.UserRepository;
-import com.example.gym_crm.common.user.UserUtils;
+import com.example.gym_crm.common.user.*;
 import com.example.gym_crm.trainee.Dto.*;
+import com.example.gym_crm.trainee.Dto.responce.TraineeCreatedResponse;
 import com.example.gym_crm.trainee.repository.TraineeRepository;
 import com.example.gym_crm.trainer.Trainer;
 import com.example.gym_crm.trainer.repository.TrainerRepository;
@@ -15,6 +13,7 @@ import com.example.gym_crm.training.repository.TrainingRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -36,6 +35,8 @@ public class TraineeServiceImpl implements TraineeService {
 
     private TrainerRepository trainerRepository;
 
+    private PasswordEncoder passwordEncoder;
+
     @Autowired
     public void setTrainerRepository(TrainerRepository trainerRepository) {
         this.trainerRepository = trainerRepository;
@@ -44,6 +45,11 @@ public class TraineeServiceImpl implements TraineeService {
     @Autowired
     public void setUserUtils(UserUtils userUtils) {
         this.userUtils = userUtils;
+    }
+
+    @Autowired
+    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Autowired
@@ -63,7 +69,7 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Transactional
     @Override
-    public Trainee createTrainee(TraineeCreateDto traineeCreateDto) {
+    public TraineeCreatedResponse createTrainee(TraineeCreateDto traineeCreateDto) {
         if (traineeCreateDto == null) {
             throw new IllegalArgumentException("Trainee create DTO cannot be null");
         }
@@ -81,8 +87,9 @@ public class TraineeServiceImpl implements TraineeService {
                 .firstName(traineeCreateDto.firstName())
                 .lastName(traineeCreateDto.lastName())
                 .username(username)
-                .password(password)
+                .password(passwordEncoder.encode(password))
                 .isActive(true)
+                .role(Role.TRAINEE)
                 .build();
 
         Trainee newTrainee = Trainee.builder()
@@ -94,7 +101,10 @@ public class TraineeServiceImpl implements TraineeService {
 
         Trainee savedTrainee = traineeRepository.save(newTrainee);
         log.debug("Created trainee successfully with ID: {}", savedTrainee.getId());
-        return savedTrainee;
+        return new TraineeCreatedResponse(
+            savedTrainee.getUser().getUsername(),
+            password
+        );
     }
 
     @Transactional
@@ -201,7 +211,7 @@ public class TraineeServiceImpl implements TraineeService {
         Trainee trainee = getTraineeByUsername(dto.getUsername());
         log.debug("Changing password for trainee with username: {}", dto.getUsername());
         User user = trainee.getUser();
-        user.setPassword(dto.getNewPassword());
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
         userRepository.save(user);
         return trainee;
     }

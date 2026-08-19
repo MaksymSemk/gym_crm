@@ -5,6 +5,7 @@ import com.example.gym_crm.common.user.User;
 import com.example.gym_crm.common.user.UserRepository;
 import com.example.gym_crm.common.user.UserUtils;
 import com.example.gym_crm.trainee.Dto.*;
+import com.example.gym_crm.trainee.Dto.responce.TraineeCreatedResponse;
 import com.example.gym_crm.trainee.repository.TraineeRepository;
 import com.example.gym_crm.trainer.Trainer;
 import com.example.gym_crm.trainer.repository.TrainerRepository;
@@ -20,7 +21,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -40,6 +44,9 @@ class TraineeServiceImplTest {
 
     @Mock
     private TraineeRepository traineeRepository;
+
+    @Spy
+    private PasswordEncoder passwordEncoder = NoOpPasswordEncoder.getInstance();
 
     @Mock
     private UserRepository userRepository;
@@ -95,10 +102,10 @@ class TraineeServiceImplTest {
             when(userUtils.generatePassword()).thenReturn("generatedPass");
             when(traineeRepository.save(any(Trainee.class))).thenReturn(sampleTrainee);
 
-            Trainee result = traineeService.createTrainee(dto);
+            TraineeCreatedResponse result = traineeService.createTrainee(dto);
 
             assertNotNull(result);
-            assertEquals("John.Doe", result.getUser().getUsername());
+            assertEquals("John.Doe", result.username());
             verify(traineeRepository, times(1)).save(any(Trainee.class));
         }
 

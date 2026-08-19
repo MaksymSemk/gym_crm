@@ -2,9 +2,11 @@ package com.example.gym_crm.application;
 
 import com.example.gym_crm.authentication.AuthData;
 import com.example.gym_crm.trainee.Dto.*;
+import com.example.gym_crm.trainee.Dto.responce.TraineeCreatedResponse;
 import com.example.gym_crm.trainee.Trainee;
 import com.example.gym_crm.trainee.TraineeService;
 import com.example.gym_crm.trainer.Dto.*;
+import com.example.gym_crm.trainer.Dto.response.TrainerCreatedResponse;
 import com.example.gym_crm.trainer.Trainer;
 import com.example.gym_crm.trainer.TrainerService;
 import com.example.gym_crm.training.Dto.TrainingCreateDto;
@@ -53,10 +55,10 @@ class GymFacadeTest {
         @DisplayName("Should delegate createTrainee to TraineeService")
         void createTrainee_DelegatesCorrectly() {
             TraineeCreateDto dto = mock(TraineeCreateDto.class);
-            Trainee expected = new Trainee();
+            TraineeCreatedResponse expected = new TraineeCreatedResponse("john.doe", "password");
             when(traineeService.createTrainee(dto)).thenReturn(expected);
 
-            Trainee result = gymFacade.createTrainee(dto);
+            TraineeCreatedResponse result = gymFacade.createTrainee(dto);
 
             assertNotNull(result);
             assertEquals(expected, result);
@@ -200,10 +202,10 @@ class GymFacadeTest {
         @DisplayName("Should delegate createTrainer setup payload variables to TrainerService")
         void createTrainer_DelegatesCorrectly() {
             TrainerCreateDto dto = mock(TrainerCreateDto.class);
-            Trainer expected = new Trainer();
+            TrainerCreatedResponse expected = new TrainerCreatedResponse("trainer.smith", "password");
             when(trainerService.createTrainer(dto)).thenReturn(expected);
 
-            Trainer result = gymFacade.createTrainer(dto);
+            TrainerCreatedResponse result = gymFacade.createTrainer(dto);
 
             assertNotNull(result);
             assertEquals(expected, result);
