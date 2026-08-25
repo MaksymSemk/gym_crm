@@ -4,38 +4,36 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.slf4j.MDC;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.UUID;
 
 @Component
 @Order(1)
+@RequiredArgsConstructor
 public class TransactionLoggingFilter extends OncePerRequestFilter {
 
-    public static final String TRANSACTION_ID_HEADER = "X-Transaction-Id";
-    public static final String MDC_TRANSACTION_ID_KEY = "transactionId";
+    public static final String REQ_ID_ATTRIBUTE = "APP_REQUEST_ID";
+    private final TransactionContextStorage contextStorage;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        String transactionId = request.getHeader(TRANSACTION_ID_HEADER);
-        if (transactionId == null || transactionId.isBlank()) {
-            transactionId = UUID.randomUUID().toString();
-        }
+        String requestId = request.getRequestId();
+        request.setAttribute(REQ_ID_ATTRIBUTE, requestId);
 
-        MDC.put(MDC_TRANSACTION_ID_KEY, transactionId);
+        String incomingTxId = request.getHeader(TransactionContextStorage.TRANSACTION_ID_HEADER);
+        String txId = contextStorage.init(requestId, incomingTxId);
 
-        response.setHeader(TRANSACTION_ID_HEADER, transactionId);
-
+        response.setHeader(TransactionContextStorage.TRANSACTION_ID_HEADER, txId);
         try {
             filterChain.doFilter(request, response);
         } finally {
-            MDC.remove(MDC_TRANSACTION_ID_KEY);
+            contextStorage.clear(txId);
         }
     }
 }

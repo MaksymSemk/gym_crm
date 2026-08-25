@@ -4,12 +4,14 @@ import com.example.grpc.common.GrpcLoggingConstants;
 import io.grpc.*;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.grpc.server.GlobalServerInterceptor;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
 @Slf4j
 @Component
+@GlobalServerInterceptor
 public class GrpcServerLoggingInterceptor implements ServerInterceptor {
 
     @Override

@@ -67,7 +67,7 @@ public class TrainerWorkloadService {
         } else if (action == ActionType.DELETE) {
             monthSummary.setTrainingSummaryDuration(Math.max(0, previousDuration - duration));
         }
-        log.info("Operation [4/5]: Recalculated duration. (Prev: {}m, Action: {}, Change: {}m, New: {}m)",
+        log.debug("Operation [4/5]: Recalculated duration. (Prev: {}m, Action: {}, Change: {}m, New: {}m)",
                 previousDuration, action, duration, monthSummary.getTrainingSummaryDuration());
 
         log.debug("Operation [5/5]: Persisting updated workload in repository");

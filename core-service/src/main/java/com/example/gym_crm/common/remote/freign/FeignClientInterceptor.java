@@ -1,33 +1,39 @@
 package com.example.gym_crm.common.remote.freign;
 
+import com.example.gym_crm.common.logging.TransactionContextStorage;
 import com.example.gym_crm.common.logging.TransactionLoggingFilter;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import jakarta.servlet.http.HttpServletRequest;
-import org.slf4j.MDC;
-import org.springframework.context.annotation.Configuration;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-@Configuration
+@Component
+@RequiredArgsConstructor
 public class FeignClientInterceptor implements RequestInterceptor {
+
+    private final TransactionContextStorage contextStorage;
 
     @Override
     public void apply(RequestTemplate template) {
-        // 1. Propagate Transaction ID from MDC
-        String transactionId = MDC.get(TransactionLoggingFilter.MDC_TRANSACTION_ID_KEY);
-        if (transactionId != null) {
-            template.header(TransactionLoggingFilter.TRANSACTION_ID_HEADER, transactionId);
-        }
+        String requestId = null;
 
-        // 2. Propagate Bearer JWT from incoming HTTP request
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (attributes != null) {
             HttpServletRequest request = attributes.getRequest();
+            requestId = (String) request.getAttribute(TransactionLoggingFilter.REQ_ID_ATTRIBUTE);
+
             String authHeader = request.getHeader("Authorization");
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 template.header("Authorization", authHeader);
             }
+        }
+
+        String txId = contextStorage.getTransactionId(requestId);
+        if (txId != null && !txId.isBlank()) {
+            template.header(TransactionContextStorage.TRANSACTION_ID_HEADER, txId);
         }
     }
 }
