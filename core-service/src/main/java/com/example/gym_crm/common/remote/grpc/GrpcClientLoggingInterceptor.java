@@ -27,7 +27,6 @@ public class GrpcClientLoggingInterceptor implements ClientInterceptor {
             CallOptions callOptions,
             Channel next) {
 
-        // 1. Resolve requestId from the incoming HTTP request context on the calling thread
         String requestId = null;
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (attributes != null) {
@@ -36,7 +35,6 @@ public class GrpcClientLoggingInterceptor implements ClientInterceptor {
             requestId = (reqIdAttr != null) ? reqIdAttr.toString() : request.getRequestId();
         }
 
-        // 2. Fetch the corresponding transactionId from the ConcurrentHashMap storage
         String resolvedTxId = contextStorage.getTransactionId(requestId);
         if (resolvedTxId == null || resolvedTxId.isBlank()) {
             resolvedTxId = UUID.randomUUID().toString();
@@ -46,7 +44,6 @@ public class GrpcClientLoggingInterceptor implements ClientInterceptor {
         return new ForwardingClientCall.SimpleForwardingClientCall<>(next.newCall(method, callOptions)) {
             @Override
             public void start(Listener<RespT> responseListener, Metadata headers) {
-                // Attach the resolved transaction ID into the gRPC outbound metadata header
                 headers.put(GrpcLoggingConstants.TRANSACTION_ID_HEADER, effectiveTxId);
 
                 super.start(new ForwardingClientCallListener.SimpleForwardingClientCallListener<>(responseListener) {

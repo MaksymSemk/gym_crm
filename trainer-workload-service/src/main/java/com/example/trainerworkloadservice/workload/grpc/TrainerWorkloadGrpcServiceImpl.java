@@ -25,7 +25,6 @@ public class TrainerWorkloadGrpcServiceImpl extends TrainerWorkloadGrpcServiceGr
 
     @Override
     public void updateWorkload(WorkloadRequest request, StreamObserver<WorkloadResponse> responseObserver) {
-        log.debug("Operation: Mapping protobuf WorkloadRequest to internal DTO");
         TrainerWorkloadRequestDto dto = getDto(request);
 
         workloadService.processWorkload(dto);

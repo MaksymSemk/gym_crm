@@ -20,7 +20,6 @@ public class GrpcServerLoggingInterceptor implements ServerInterceptor {
             Metadata headers,
             ServerCallHandler<ReqT, RespT> next) {
 
-        // 1. Extract propagated Transaction ID or generate a new one
         String txId = headers.get(GrpcLoggingConstants.TRANSACTION_ID_HEADER);
         if (txId == null || txId.isBlank()) {
             txId = UUID.randomUUID().toString();
