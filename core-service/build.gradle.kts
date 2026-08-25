@@ -1,7 +1,7 @@
 plugins {
     java
-    id("org.springframework.boot")
-    id("io.spring.dependency-management")
+    id("org.springframework.boot") version "4.1.0"
+    id("io.spring.dependency-management") version "1.1.7"
 }
 
 group = "com.example"
@@ -16,6 +16,7 @@ java {
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 extra["springCloudVersion"] = "2025.1.2"
@@ -62,7 +63,7 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
 
     implementation("org.springframework.boot:spring-boot-starter-grpc-client")
-    implementation(project(":common-grpc"))
+    implementation("com.example:common-grpc:0.0.1-SNAPSHOT")
 }
 
 dependencyManagement {

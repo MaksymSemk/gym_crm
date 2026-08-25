@@ -1,8 +1,8 @@
 plugins {
     java
-    id("org.springframework.boot")
-    id("io.spring.dependency-management")
-    id("com.google.protobuf")
+    id("org.springframework.boot") version "4.1.0"
+    id("io.spring.dependency-management") version "1.1.7"
+    id("com.google.protobuf") version "0.9.6"
 }
 
 group = "com.example"
@@ -17,6 +17,7 @@ java {
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 extra["springCloudVersion"] = "2025.1.2"
@@ -35,7 +36,7 @@ dependencies {
     runtimeOnly("com.h2database:h2")
     annotationProcessor("org.projectlombok:lombok")
 
-    implementation(project(":common-grpc"))
+    implementation("com.example:common-grpc:0.0.1-SNAPSHOT")
 
     testImplementation("org.springframework.boot:spring-boot-starter-security-test")
     testImplementation("org.springframework.boot:spring-boot-starter-validation-test")

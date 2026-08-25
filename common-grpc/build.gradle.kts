@@ -1,6 +1,7 @@
 plugins {
     `java-library`
-    id("com.google.protobuf")
+    `maven-publish`
+    id("com.google.protobuf") version "0.9.6"
 }
 
 group = "com.example"
@@ -51,6 +52,14 @@ sourceSets {
                 "build/generated/source/proto/main/java",
                 "build/generated/source/proto/main/grpc"
             )
+        }
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
         }
     }
 }
