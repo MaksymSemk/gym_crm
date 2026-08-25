@@ -1,11 +1,13 @@
 package com.example.gym_crm.training;
 
 import com.example.gym_crm.common.exception.EntityDoesNotExistException;
+import com.example.gym_crm.common.user.User;
 import com.example.gym_crm.trainee.Trainee;
 import com.example.gym_crm.trainee.repository.TraineeRepository;
 import com.example.gym_crm.trainer.Trainer;
 import com.example.gym_crm.trainer.repository.TrainerRepository;
 import com.example.gym_crm.training.Dto.TrainingCreateDto;
+import com.example.gym_crm.training.remote.TrainerWorkloadClient;
 import com.example.gym_crm.training.repository.TrainingRepository;
 import com.example.gym_crm.training_type.TrainingType;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
@@ -40,6 +43,9 @@ class TrainingServiceImplTest {
     @Mock
     private TrainerRepository trainerRepository;
 
+    @Spy
+    private TrainerWorkloadClient trainerWorkloadClient;
+
     private Trainee sampleTrainee;
     private Trainer sampleTrainer;
     private TrainingType sampleSpecialization;
@@ -60,6 +66,9 @@ class TrainingServiceImplTest {
         sampleTrainer = new Trainer();
         sampleTrainer.setId(UUID.randomUUID());
         sampleTrainer.setSpecialization(sampleSpecialization);
+        sampleTrainer.setUser( User.builder()
+                .username("emma.trainer")
+                .build());
 
         sampleTraining = Training.builder()
                 .id(trainingId)
