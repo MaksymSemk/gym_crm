@@ -6,6 +6,8 @@ import com.example.gym_crm.trainee.repository.TraineeRepository;
 import com.example.gym_crm.trainer.Trainer;
 import com.example.gym_crm.trainer.repository.TrainerRepository;
 import com.example.gym_crm.training.Dto.TrainingCreateDto;
+import com.example.gym_crm.training.remote.TrainerWorkloadClient;
+import com.example.gym_crm.training.remote.dto.TrainerWorkloadRequest;
 import com.example.gym_crm.training.repository.TrainingRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ public class TrainingServiceImpl implements TrainingService {
     private final TrainingRepository trainingRepository;
     private final TraineeRepository traineeRepository;
     private final TrainerRepository trainerRepository;
+    private final TrainerWorkloadClient trainerWorkloadClient;
 
     @Transactional
     @Override
@@ -48,6 +51,20 @@ public class TrainingServiceImpl implements TrainingService {
 
         Training savedTraining = trainingRepository.save(newTraining);
         log.info("Successfully created training session with ID: {}", savedTraining.getId());
+
+        // --- Trigger HTTP Call to Trainer Workload Microservice ---
+        TrainerWorkloadRequest workloadRequest = new TrainerWorkloadRequest(
+                trainer.getUser().getUsername(),
+                trainer.getUser().getFirstName(),
+                trainer.getUser().getLastName(),
+                trainer.getUser().getIsActive(),
+                savedTraining.getTrainingDate(),
+                savedTraining.getTrainingDuration(),
+                TrainerWorkloadRequest.ActionType.ADD
+        );
+
+        log.debug("Dispatching ADD workload request for trainer: {}", trainer.getUser().getUsername());
+        trainerWorkloadClient.updateWorkload(workloadRequest);
         return savedTraining;
     }
 

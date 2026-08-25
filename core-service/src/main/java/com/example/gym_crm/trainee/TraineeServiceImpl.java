@@ -9,6 +9,7 @@ import com.example.gym_crm.trainer.Trainer;
 import com.example.gym_crm.trainer.repository.TrainerRepository;
 import com.example.gym_crm.trainer.TrainingDoesNotBelongToTrainerException;
 import com.example.gym_crm.training.Training;
+import com.example.gym_crm.training.remote.grpc.TrainerWorkloadGrpcClient;
 import com.example.gym_crm.training.repository.TrainingRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,13 @@ public class TraineeServiceImpl implements TraineeService {
     private TrainerRepository trainerRepository;
 
     private PasswordEncoder passwordEncoder;
+
+    private TrainerWorkloadGrpcClient trainerWorkloadGrpcClient;
+
+    @Autowired
+    public void setTrainerWorkloadGrpcClient(TrainerWorkloadGrpcClient trainerWorkloadGrpcClient) {
+        this.trainerWorkloadGrpcClient = trainerWorkloadGrpcClient;
+    }
 
     @Autowired
     public void setTrainerRepository(TrainerRepository trainerRepository) {
@@ -247,6 +255,15 @@ public class TraineeServiceImpl implements TraineeService {
 
         log.warn("Attempting to delete trainee with username: {}", username);
         Trainee trainee = getTraineeByUsername(username);
+
+        List<Training> trainings = trainee.getTrainings();
+
+        if (trainings != null && !trainings.isEmpty()) {
+            for (Training t : trainings) {
+                trainerWorkloadGrpcClient.deductWorkload(t);
+            }
+        }
+
         UUID traineeId = trainee.getId();
         User user = trainee.getUser();
 
@@ -254,7 +271,7 @@ public class TraineeServiceImpl implements TraineeService {
         if (user != null) {
             userRepository.deleteById(user.getId());
         }
-        log.warn("Trainee {} deleted successfully", username);
+        log.warn("Trainee {} deleted successfully and workloads updated", username);
     }
 
     @Transactional
