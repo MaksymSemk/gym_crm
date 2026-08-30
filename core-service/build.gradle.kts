@@ -64,6 +64,7 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-grpc-client")
     implementation("com.example:common-grpc:0.0.1-SNAPSHOT")
+    implementation("org.springframework.boot:spring-boot-starter-kafka:4.2.0-M1")
 }
 
 dependencyManagement {
