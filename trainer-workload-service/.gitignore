@@ -1,4 +1,4 @@
-HELP.md
+../temp/HELP.md
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
@@ -35,4 +35,3 @@ out/
 
 ### VS Code ###
 .vscode/
-core-service/src/test/java/com/example/gym_crm/PasswordHashTest.java

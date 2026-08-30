@@ -1,0 +1,315 @@
+package com.example.gym_crm.trainee;
+
+import com.example.gym_crm.common.exception.EntityDoesNotExistException;
+import com.example.gym_crm.common.user.*;
+import com.example.gym_crm.trainee.Dto.*;
+import com.example.gym_crm.trainee.Dto.responce.TraineeCreatedResponse;
+import com.example.gym_crm.trainee.repository.TraineeRepository;
+import com.example.gym_crm.trainer.Trainer;
+import com.example.gym_crm.trainer.repository.TrainerRepository;
+import com.example.gym_crm.trainer.TrainingDoesNotBelongToTrainerException;
+import com.example.gym_crm.training.Training;
+import com.example.gym_crm.training.remote.grpc.TrainerWorkloadGrpcClient;
+import com.example.gym_crm.training.repository.TrainingRepository;
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@Slf4j
+public class TraineeServiceImpl implements TraineeService {
+
+    private TraineeRepository traineeRepository;
+
+    private UserRepository userRepository;
+
+    private TrainingRepository trainingRepository;
+
+    private UserUtils userUtils;
+
+    private TrainerRepository trainerRepository;
+
+    private PasswordEncoder passwordEncoder;
+
+    private TrainerWorkloadGrpcClient trainerWorkloadGrpcClient;
+
+    @Autowired
+    public void setTrainerWorkloadGrpcClient(TrainerWorkloadGrpcClient trainerWorkloadGrpcClient) {
+        this.trainerWorkloadGrpcClient = trainerWorkloadGrpcClient;
+    }
+
+    @Autowired
+    public void setTrainerRepository(TrainerRepository trainerRepository) {
+        this.trainerRepository = trainerRepository;
+    }
+
+    @Autowired
+    public void setUserUtils(UserUtils userUtils) {
+        this.userUtils = userUtils;
+    }
+
+    @Autowired
+    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Autowired
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    @Autowired
+    public void setTraineeRepository(TraineeRepository traineeRepository) {
+        this.traineeRepository = traineeRepository;
+    }
+
+    @Autowired
+    public void setTrainingRepository(TrainingRepository trainingRepository) {
+        this.trainingRepository = trainingRepository;
+    }
+
+    @Transactional
+    @Override
+    public TraineeCreatedResponse createTrainee(TraineeCreateDto traineeCreateDto) {
+        if (traineeCreateDto == null) {
+            throw new IllegalArgumentException("Trainee create DTO cannot be null");
+        }
+
+        log.debug("Creating trainee: {} {}", traineeCreateDto.firstName(), traineeCreateDto.lastName());
+
+        if (traineeCreateDto.dateOfBirth().isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("Date of birth cannot be in the future");
+        }
+
+        String username = userUtils.createUsername(traineeCreateDto.firstName(), traineeCreateDto.lastName());
+        String password = userUtils.generatePassword();
+
+        User newUser = User.builder()
+                .firstName(traineeCreateDto.firstName())
+                .lastName(traineeCreateDto.lastName())
+                .username(username)
+                .password(passwordEncoder.encode(password))
+                .isActive(true)
+                .role(Role.TRAINEE)
+                .build();
+
+        Trainee newTrainee = Trainee.builder()
+                .dateOfBirth(traineeCreateDto.dateOfBirth())
+                .address(traineeCreateDto.address())
+                .user(newUser)
+                .trainers(new ArrayList<>())
+                .build();
+
+        Trainee savedTrainee = traineeRepository.save(newTrainee);
+        log.debug("Created trainee successfully with ID: {}", savedTrainee.getId());
+        return new TraineeCreatedResponse(
+            savedTrainee.getUser().getUsername(),
+            password
+        );
+    }
+
+    @Transactional
+    @Override
+    public Trainee updateTrainee(TraineeUpdateDto traineeUpdateDto) {
+        if (traineeUpdateDto == null || traineeUpdateDto.username() == null) {
+            throw new IllegalArgumentException("Invalid update parameters");
+        }
+
+        log.debug("Updating trainee profile for username: {}", traineeUpdateDto.username());
+
+        Trainee trainee = traineeRepository.findByUserUsername(traineeUpdateDto.username())
+                .orElseThrow(() -> new EntityDoesNotExistException("Trainee not found with username: " + traineeUpdateDto.username()));
+
+        User user = trainee.getUser();
+
+        user.setFirstName(traineeUpdateDto.firstName());
+        user.setLastName(traineeUpdateDto.lastName());
+
+        if (traineeUpdateDto.isActive() != null) {
+            user.setIsActive(traineeUpdateDto.isActive());
+        }
+
+        if (traineeUpdateDto.dateOfBirth() != null) {
+            if (traineeUpdateDto.dateOfBirth().isAfter(LocalDate.now())) {
+                throw new IllegalArgumentException("Date of birth cannot be in the future");
+            }
+            trainee.setDateOfBirth(traineeUpdateDto.dateOfBirth());
+        }
+
+        if (traineeUpdateDto.address() != null && !traineeUpdateDto.address().isBlank()) {
+            trainee.setAddress(traineeUpdateDto.address());
+        }
+
+        userRepository.save(user);
+        return traineeRepository.save(trainee);
+    }
+
+    private List<Training> getAllTrainings(List<UUID> trainingIds, UUID traineeId) {
+        if (trainingIds == null) return null;
+        return trainingIds.stream().map( id->{
+            Training training = trainingRepository.findById(id).orElseThrow(
+                () -> new EntityDoesNotExistException("There is no training with id " + id)
+            );
+            if (!training.getTrainee().getId().equals(traineeId)) {
+                throw new TrainingDoesNotBelongToTrainerException("Training with ID " + id + " does not belong to the trainee with id " + traineeId);
+            }
+
+            return training;
+        }).toList();
+    }
+
+    @Transactional
+    @Override
+    public void deleteTrainee(UUID id) {
+        if (id == null){
+            throw new IllegalArgumentException("Trainee id cannot be null");
+        }
+        log.warn("Attempting to delete trainee with ID: {}", id);
+
+        Trainee trainee = traineeRepository.findById(id).orElseThrow(
+                () -> new EntityDoesNotExistException("There is no trainee with id " + id)
+        );
+
+        User user = trainee.getUser();
+        traineeRepository.deleteById(id);
+        if (user != null) {
+            userRepository.deleteById(user.getId());
+        }
+    }
+
+    @Transactional
+    @Override
+    public Trainee getTraineeById(UUID id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Trainee id cannot be null");
+        }
+
+        log.debug("Retrieving trainee with ID: {}", id);
+        return traineeRepository.findById(id).orElseThrow(
+                ()-> new EntityDoesNotExistException("There is no trainee with id " + id)
+        );
+    }
+
+    @Transactional
+    @Override
+    public Trainee getTraineeByUsername(String username) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Username cannot be null or empty");
+        }
+
+        log.debug("Retrieving trainee by username: {}", username);
+        return traineeRepository.findByUserUsername(username).orElseThrow(
+                () -> new EntityDoesNotExistException("There is no trainee with username " + username)
+        );
+    }
+
+    @Transactional
+    @Override
+    public Trainee changePassword(TraineeChangePasswordDto dto) {
+        if (dto == null || dto.getNewPassword() == null || dto.getNewPassword().isBlank()) {
+            throw new IllegalArgumentException("Invalid password update data");
+        }
+        Trainee trainee = getTraineeByUsername(dto.getUsername());
+        log.debug("Changing password for trainee with username: {}", dto.getUsername());
+        User user = trainee.getUser();
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(user);
+        return trainee;
+    }
+
+    @Transactional
+    @Override
+    public Trainee updateTraineeStatus(String username, Boolean isActive) {
+        if (username == null || username.isBlank() || isActive == null) {
+            throw new IllegalArgumentException("Username and active status must be provided");
+        }
+
+        Trainee trainee = getTraineeByUsername(username);
+        User user = trainee.getUser();
+
+        if (user.getIsActive().equals(isActive)) {
+            throw new IllegalArgumentException(
+                    String.format("Trainee '%s' is already in active status: %b. Action is non-idempotent.", username, isActive)
+            );
+        }
+
+        user.setIsActive(isActive);
+        userRepository.save(user);
+        log.debug("Trainee {} status changed to {}", username, isActive);
+        return trainee;
+    }
+
+    @Transactional
+    @Override
+    public void deleteTraineeByUsername(String username) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Username cannot be null or empty");
+        }
+
+        log.warn("Attempting to delete trainee with username: {}", username);
+        Trainee trainee = getTraineeByUsername(username);
+
+        List<Training> trainings = trainee.getTrainings();
+
+        if (trainings != null && !trainings.isEmpty()) {
+            for (Training t : trainings) {
+                trainerWorkloadGrpcClient.deductWorkload(t);
+            }
+        }
+
+        UUID traineeId = trainee.getId();
+        User user = trainee.getUser();
+
+        traineeRepository.deleteById(traineeId);
+        if (user != null) {
+            userRepository.deleteById(user.getId());
+        }
+        log.warn("Trainee {} deleted successfully and workloads updated", username);
+    }
+
+    @Transactional
+    @Override
+    public Trainee updateTraineeTrainers(TraineeUpdateTrainersDto dto) {
+        var trainers = dto.trainersList().stream().map(trainerUsernameDto -> trainerRepository.findByUserUsername(trainerUsernameDto.username()).orElseThrow(
+                () -> new EntityDoesNotExistException("There is no trainer with id " + trainerUsernameDto)
+        )).toList();
+
+        Trainee trainee = getTraineeByUsername(dto.traineeUsername());
+        log.debug("Updating trainers list for trainee with id: {}", trainee.getId());
+        trainee.setTrainers(trainers);
+        Trainee updatedTrainee = traineeRepository.save(trainee);
+        log.debug("Updated trainee {} with {} trainers", trainee.getId(), trainers.size());
+        return updatedTrainee;
+    }
+
+    @Transactional
+    @Override
+    public List<Training> getTraineeTrainings(TraineeTrainingsSearchDto dto) {
+        if (dto == null || dto.getUsername() == null) throw new IllegalArgumentException("Invalid filters context");
+        getTraineeByUsername(dto.getUsername());
+        return trainingRepository.findTraineeTrainingsByCriteria(
+                dto.getUsername(), dto.getFromDate(), dto.getToDate(), dto.getTrainerName(), dto.getTrainingType()
+        );
+    }
+
+    @Transactional
+    @Override
+    public List<Trainer> getUnassignedActiveTrainers(String username) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Username cannot be null or empty");
+        }
+
+        log.debug("Fetching unassigned active trainers for trainee: {}", username);
+
+        getTraineeByUsername(username);
+
+        return trainerRepository.findActiveTrainersNotAssignedToTrainee(username);
+    }
+}
