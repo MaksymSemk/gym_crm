@@ -7,7 +7,7 @@ import com.example.gym_crm.trainee.repository.TraineeRepository;
 import com.example.gym_crm.trainer.Trainer;
 import com.example.gym_crm.trainer.repository.TrainerRepository;
 import com.example.gym_crm.training.Dto.TrainingCreateDto;
-import com.example.gym_crm.training.remote.TrainerWorkloadClient;
+import com.example.gym_crm.training.remote.kafka.TrainerWorkloadProducer;
 import com.example.gym_crm.training.repository.TrainingRepository;
 import com.example.gym_crm.training_type.TrainingType;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,8 +43,8 @@ class TrainingServiceImplTest {
     @Mock
     private TrainerRepository trainerRepository;
 
-    @Spy
-    private TrainerWorkloadClient trainerWorkloadClient;
+    @Mock
+    private TrainerWorkloadProducer trainerWorkloadProducer;
 
     private Trainee sampleTrainee;
     private Trainer sampleTrainer;
@@ -99,6 +99,7 @@ class TrainingServiceImplTest {
             when(traineeRepository.findByUserUsername("john.trainee")).thenReturn(Optional.of(sampleTrainee));
             when(trainerRepository.findByUserUsername("emma.trainer")).thenReturn(Optional.of(sampleTrainer));
             when(trainingRepository.save(any(Training.class))).thenReturn(sampleTraining);
+            trainerWorkloadProducer.sendWorkloadUpdate(any());
 
             Training result = trainingService.createTraining(dto);
 

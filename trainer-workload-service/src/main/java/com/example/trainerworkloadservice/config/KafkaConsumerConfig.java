@@ -27,7 +27,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class KafkaConsumerConfig {
 
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper =  new ObjectMapper();
 
     @Value("${spring.kafka.bootstrap-servers:localhost:9092}")
     private String bootstrapServers;
