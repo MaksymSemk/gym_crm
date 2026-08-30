@@ -38,7 +38,6 @@ public class TrainerWorkloadConsumer {
             log.info("Received Kafka message from partition {} offset {} with key: {}",
                     record.partition(), record.offset(), record.key());
 
-            // Validate missing or invalid required fields
             Set<ConstraintViolation<TrainerWorkloadRequestDto>> violations = validator.validate(payload);
             if (!violations.isEmpty()) {
                 String errorMsg = violations.stream()

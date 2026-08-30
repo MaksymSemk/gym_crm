@@ -39,7 +39,7 @@ public class KafkaConsumerConfig {
     @Value("${spring.kafka.consumer.group-id:trainer-workload-group}")
     private String groupId;
 
-    // --- Consumer Configuration with robust Jackson deserialization ---
+    // --- Consumer Configuration ---
 
     @Bean
     public ConsumerFactory<String, TrainerWorkloadRequestDto> consumerFactory() {
