@@ -8,10 +8,11 @@ import jakarta.validation.ValidationException;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.common.header.Header;
 import org.slf4j.MDC;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -27,16 +28,23 @@ public class TrainerWorkloadConsumer {
     private final TrainerWorkloadService workloadService;
     private final Validator validator;
 
-    @KafkaListener(topics = "${kafka.topic.trainer-workload:trainer-workload-topic}", groupId = "${spring.kafka.consumer.group-id:trainer-workload-group}")
-    public void consume(ConsumerRecord<String, TrainerWorkloadRequestDto> record) {
-        Header txHeader = record.headers().lastHeader(TransactionLoggingFilter.TRANSACTION_ID_HEADER);
-        String txId = (txHeader != null) ? new String(txHeader.value(), StandardCharsets.UTF_8) : UUID.randomUUID().toString();
+    @KafkaListener(
+            topics = "${kafka.topic.trainer-workload:trainer-workload-topic}",
+            groupId = "${spring.kafka.consumer.group-id:trainer-workload-group}",
+            containerFactory = "kafkaListenerContainerFactory"
+    )
+    public void consume(
+            @Payload TrainerWorkloadRequestDto payload,
+            @Header(name = TransactionLoggingFilter.TRANSACTION_ID_HEADER, required = false) byte[] rawTxIdBytes,
+            @Header(value = KafkaHeaders.RECEIVED_KEY, required = false) String key,
+            @Header(value = KafkaHeaders.RECEIVED_PARTITION, required = false) Integer partition,
+            @Header(value = KafkaHeaders.OFFSET, required = false) Long offset
+    ) {
+        String txId = extractTransactionId(rawTxIdBytes);
 
         MDC.put(TransactionLoggingFilter.MDC_TRANSACTION_ID_KEY, txId);
         try {
-            TrainerWorkloadRequestDto payload = record.value();
-            log.info("Received Kafka message from partition {} offset {} with key: {}",
-                    record.partition(), record.offset(), record.key());
+            log.info("Received Kafka message from partition {} offset {} with key: {}", partition, offset, key);
 
             Set<ConstraintViolation<TrainerWorkloadRequestDto>> violations = validator.validate(payload);
             if (!violations.isEmpty()) {
@@ -52,5 +60,11 @@ public class TrainerWorkloadConsumer {
         } finally {
             MDC.remove(TransactionLoggingFilter.MDC_TRANSACTION_ID_KEY);
         }
+    }
+
+    private String extractTransactionId(byte[] rawTxIdBytes) {
+        return (rawTxIdBytes != null && rawTxIdBytes.length > 0)
+                ? new String(rawTxIdBytes, StandardCharsets.UTF_8)
+                : UUID.randomUUID().toString();
     }
 }

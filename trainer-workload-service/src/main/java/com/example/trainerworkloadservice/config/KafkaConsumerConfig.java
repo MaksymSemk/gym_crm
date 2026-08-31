@@ -1,17 +1,14 @@
 package com.example.trainerworkloadservice.config;
 
-import com.example.trainerworkloadservice.workload.dto.TrainerWorkloadRequestDto;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.serialization.Deserializer;
-import org.apache.kafka.common.serialization.Serializer;
+import org.apache.kafka.common.serialization.ByteArrayDeserializer;
+import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,10 +16,11 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
-import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
+import org.springframework.kafka.support.converter.JacksonJsonMessageConverter;
+import org.springframework.kafka.support.converter.RecordMessageConverter;
 import org.springframework.util.backoff.FixedBackOff;
+import tools.jackson.databind.json.JsonMapper;
 
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,8 +28,6 @@ import java.util.Map;
 @Configuration
 @RequiredArgsConstructor
 public class KafkaConsumerConfig {
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${spring.kafka.bootstrap-servers:localhost:9092}")
     private String bootstrapServers;
@@ -42,41 +38,33 @@ public class KafkaConsumerConfig {
     // --- Consumer Configuration ---
 
     @Bean
-    public ConsumerFactory<String, TrainerWorkloadRequestDto> consumerFactory() {
+    public ConsumerFactory<String, Object> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
 
-        ObjectMapper customMapper = objectMapper.copy()
-                .registerModule(new JavaTimeModule())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        Deserializer<TrainerWorkloadRequestDto> valueDeserializer = (topic, data) -> {
-            if (data == null || data.length == 0) {
-                return null;
-            }
-            try {
-                return customMapper.readValue(data, TrainerWorkloadRequestDto.class);
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Failed to deserialize JSON to TrainerWorkloadRequestDto: " + new String(data, StandardCharsets.UTF_8), e);
-            }
-        };
-
-        return new DefaultKafkaConsumerFactory<>(
-                props,
-                new StringDeserializer(),
-                new ErrorHandlingDeserializer<>(valueDeserializer)
-        );
+        return new DefaultKafkaConsumerFactory<>(props);
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, TrainerWorkloadRequestDto> kafkaListenerContainerFactory(
-            ConsumerFactory<String, TrainerWorkloadRequestDto> consumerFactory,
+    public RecordMessageConverter messageConverter() {
+        JsonMapper jsonMapper = JsonMapper.builder()
+                .build();
+        return new JacksonJsonMessageConverter(jsonMapper);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory(
+            ConsumerFactory<String, Object> consumerFactory,
+            RecordMessageConverter messageConverter,
             DefaultErrorHandler errorHandler) {
-        ConcurrentKafkaListenerContainerFactory<String, TrainerWorkloadRequestDto> factory =
+        ConcurrentKafkaListenerContainerFactory<String, Object> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
+        factory.setRecordMessageConverter(messageConverter);
         factory.setCommonErrorHandler(errorHandler);
         return factory;
     }
@@ -87,26 +75,10 @@ public class KafkaConsumerConfig {
     public ProducerFactory<Object, Object> dlqProducerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
 
-        Serializer<Object> keySerializer = (topic, data) -> {
-            if (data == null) return null;
-            if (data instanceof byte[] bytes) return bytes;
-            return data.toString().getBytes(StandardCharsets.UTF_8);
-        };
-
-        Serializer<Object> valueSerializer = (topic, data) -> {
-            if (data == null) return null;
-            if (data instanceof byte[] bytes) return bytes;
-            if (data instanceof String str) return str.getBytes(StandardCharsets.UTF_8);
-            try {
-                return objectMapper.writeValueAsBytes(data);
-            } catch (Exception e) {
-                log.error("Failed to serialize DLQ message payload", e);
-                return data.toString().getBytes(StandardCharsets.UTF_8);
-            }
-        };
-
-        return new DefaultKafkaProducerFactory<>(props, keySerializer, valueSerializer);
+        return new DefaultKafkaProducerFactory<>(props);
     }
 
     @Bean
@@ -118,9 +90,10 @@ public class KafkaConsumerConfig {
     public DefaultErrorHandler errorHandler(KafkaOperations<Object, Object> dlqKafkaTemplate) {
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(dlqKafkaTemplate,
                 (record, ex) -> {
+                    String dltTopic = record.topic() + ".DLT";
                     log.error("Routing failed message to DLQ [Topic: {}, Key: {}, Cause: {}]",
-                            record.topic() + ".DLT", record.key(), ex.getMessage());
-                    return new TopicPartition(record.topic() + ".DLT", -1);
+                            dltTopic, record.key(), ex.getMessage());
+                    return new TopicPartition(dltTopic, -1);
                 });
 
         FixedBackOff backOff = new FixedBackOff(1000L, 2L);
