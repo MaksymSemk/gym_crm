@@ -45,7 +45,10 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.22.2")
 
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb:4.2.0-M1")
-    testImplementation("org.testcontainers:mongodb")
+    testImplementation("org.testcontainers:mongodb:1.21.4")
+    testImplementation("org.testcontainers:junit-jupiter:1.21.4")
+    testImplementation("org.testcontainers:testcontainers:1.21.4")
+    testImplementation("org.springframework.boot:spring-boot-starter-data-mongodb-test:4.2.0-M1")
 
 }
 

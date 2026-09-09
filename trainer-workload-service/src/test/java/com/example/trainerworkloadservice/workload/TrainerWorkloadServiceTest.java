@@ -49,9 +49,10 @@ class TrainerWorkloadServiceTest {
     }
 
     @Test
-    @DisplayName("processWorkload creates new TrainerWorkload when trainer does not exist")
+    @DisplayName("processWorkload creates new TrainerWorkload document when trainer does not exist")
     void processWorkload_NewTrainer_CreatesAndSaves() {
-        when(repository.findByUsername("john.doe")).thenReturn(Optional.empty());
+        when(repository.findByTrainerUsername("john.doe")).thenReturn(Optional.empty());
+        when(repository.save(any(TrainerWorkload.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         workloadService.processWorkload(baseRequest);
 
@@ -83,12 +84,37 @@ class TrainerWorkloadServiceTest {
                         new YearSummary(2026, new ArrayList<>(List.of(new MonthSummary(8, 45))))
                 ))
         );
-        when(repository.findByUsername("john.doe")).thenReturn(Optional.of(existing));
+        when(repository.findByTrainerUsername("john.doe")).thenReturn(Optional.of(existing));
+        when(repository.save(any(TrainerWorkload.class))).thenReturn(existing);
 
         workloadService.processWorkload(baseRequest);
 
         verify(repository).save(existing);
         assertThat(existing.getYears().get(0).getMonths().get(0).getTrainingSummaryDuration()).isEqualTo(105);
+    }
+
+    @Test
+    @DisplayName("processWorkload creates new MonthSummary if year exists but month does not")
+    void processWorkload_ExistingYearNewMonth_AddsMonthEntry() {
+        TrainerWorkload existing = new TrainerWorkload(
+                "john.doe", "John", "Doe", true,
+                new ArrayList<>(List.of(
+                        new YearSummary(2026, new ArrayList<>(List.of(new MonthSummary(5, 40))))
+                ))
+        );
+        when(repository.findByTrainerUsername("john.doe")).thenReturn(Optional.of(existing));
+        when(repository.save(any(TrainerWorkload.class))).thenReturn(existing);
+
+        workloadService.processWorkload(baseRequest);
+
+        verify(repository).save(existing);
+        YearSummary yearSummary = existing.getYears().get(0);
+        assertThat(yearSummary.getMonths()).hasSize(2);
+        assertThat(yearSummary.getMonths().stream()
+                .filter(m -> m.getMonthNumber() == 8)
+                .findFirst()
+                .get()
+                .getTrainingSummaryDuration()).isEqualTo(60);
     }
 
     @Test
@@ -100,7 +126,8 @@ class TrainerWorkloadServiceTest {
                         new YearSummary(2026, new ArrayList<>(List.of(new MonthSummary(8, 100))))
                 ))
         );
-        when(repository.findByUsername("john.doe")).thenReturn(Optional.of(existing));
+        when(repository.findByTrainerUsername("john.doe")).thenReturn(Optional.of(existing));
+        when(repository.save(any(TrainerWorkload.class))).thenReturn(existing);
 
         TrainerWorkloadRequestDto deleteRequest = new TrainerWorkloadRequestDto(
                 "john.doe", "John", "Doe", true,
@@ -122,7 +149,8 @@ class TrainerWorkloadServiceTest {
                         new YearSummary(2026, new ArrayList<>(List.of(new MonthSummary(8, 30))))
                 ))
         );
-        when(repository.findByUsername("john.doe")).thenReturn(Optional.of(existing));
+        when(repository.findByTrainerUsername("john.doe")).thenReturn(Optional.of(existing));
+        when(repository.save(any(TrainerWorkload.class))).thenReturn(existing);
 
         TrainerWorkloadRequestDto deleteRequest = new TrainerWorkloadRequestDto(
                 "john.doe", "John", "Doe", true,
@@ -139,7 +167,7 @@ class TrainerWorkloadServiceTest {
     @DisplayName("getTrainerWorkload returns workload when trainer exists")
     void getTrainerWorkload_Found_ReturnsWorkload() {
         TrainerWorkload existing = new TrainerWorkload("john.doe", "John", "Doe", true, new ArrayList<>());
-        when(repository.findByUsername("john.doe")).thenReturn(Optional.of(existing));
+        when(repository.findByTrainerUsername("john.doe")).thenReturn(Optional.of(existing));
 
         TrainerWorkload result = workloadService.getTrainerWorkload("john.doe");
 
@@ -149,7 +177,7 @@ class TrainerWorkloadServiceTest {
     @Test
     @DisplayName("getTrainerWorkload throws IllegalArgumentException when trainer not found")
     void getTrainerWorkload_NotFound_ThrowsException() {
-        when(repository.findByUsername("unknown")).thenReturn(Optional.empty());
+        when(repository.findByTrainerUsername("unknown")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> workloadService.getTrainerWorkload("unknown"))
                 .isInstanceOf(IllegalArgumentException.class)
