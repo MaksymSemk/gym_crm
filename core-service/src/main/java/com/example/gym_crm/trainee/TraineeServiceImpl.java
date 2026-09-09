@@ -1,15 +1,19 @@
 package com.example.gym_crm.trainee;
 
 import com.example.gym_crm.common.exception.EntityDoesNotExistException;
-import com.example.gym_crm.common.user.*;
+import com.example.gym_crm.common.user.Role;
+import com.example.gym_crm.common.user.User;
+import com.example.gym_crm.common.user.UserRepository;
+import com.example.gym_crm.common.user.UserUtils;
 import com.example.gym_crm.trainee.Dto.*;
 import com.example.gym_crm.trainee.Dto.responce.TraineeCreatedResponse;
 import com.example.gym_crm.trainee.repository.TraineeRepository;
 import com.example.gym_crm.trainer.Trainer;
-import com.example.gym_crm.trainer.repository.TrainerRepository;
 import com.example.gym_crm.trainer.TrainingDoesNotBelongToTrainerException;
+import com.example.gym_crm.trainer.repository.TrainerRepository;
 import com.example.gym_crm.training.Training;
-import com.example.gym_crm.training.remote.grpc.TrainerWorkloadGrpcClient;
+import com.example.gym_crm.training.remote.dto.TrainerWorkloadRequest;
+import com.example.gym_crm.training.remote.kafka.TrainerWorkloadProducer;
 import com.example.gym_crm.training.repository.TrainingRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -38,11 +42,11 @@ public class TraineeServiceImpl implements TraineeService {
 
     private PasswordEncoder passwordEncoder;
 
-    private TrainerWorkloadGrpcClient trainerWorkloadGrpcClient;
+    private TrainerWorkloadProducer trainerWorkloadProducer;
 
     @Autowired
-    public void setTrainerWorkloadGrpcClient(TrainerWorkloadGrpcClient trainerWorkloadGrpcClient) {
-        this.trainerWorkloadGrpcClient = trainerWorkloadGrpcClient;
+    public void setTrainerWorkloadProducer(TrainerWorkloadProducer trainerWorkloadProducer) {
+        this.trainerWorkloadProducer = trainerWorkloadProducer;
     }
 
     @Autowired
@@ -260,7 +264,16 @@ public class TraineeServiceImpl implements TraineeService {
 
         if (trainings != null && !trainings.isEmpty()) {
             for (Training t : trainings) {
-                trainerWorkloadGrpcClient.deductWorkload(t);
+                TrainerWorkloadRequest deleteRequest = new TrainerWorkloadRequest(
+                        t.getTrainer().getUser().getUsername(),
+                        t.getTrainer().getUser().getFirstName(),
+                        t.getTrainer().getUser().getLastName(),
+                        t.getTrainer().getUser().getIsActive(),
+                        t.getTrainingDate(),
+                        t.getTrainingDuration(),
+                        TrainerWorkloadRequest.ActionType.DELETE
+                );
+                trainerWorkloadProducer.sendWorkloadUpdate(deleteRequest);
             }
         }
 

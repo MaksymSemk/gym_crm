@@ -77,6 +77,6 @@ public class TrainerWorkloadService {
 
     public TrainerWorkload getTrainerWorkload(String username) {
         return repository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("Trainer not found with username: " + username));
+                .orElseThrow(() -> new IllegalArgumentException("Trainer workload not found with username: " + username));
     }
 }

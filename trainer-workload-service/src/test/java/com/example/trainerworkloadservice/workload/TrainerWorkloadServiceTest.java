@@ -153,6 +153,6 @@ class TrainerWorkloadServiceTest {
 
         assertThatThrownBy(() -> workloadService.getTrainerWorkload("unknown"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Trainer not found with username: unknown");
+                .hasMessageContaining("Trainer workload not found with username: unknown");
     }
 }

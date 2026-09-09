@@ -5,6 +5,8 @@ import com.example.trainerworkloadservice.workload.dto.ActionType;
 import com.example.trainerworkloadservice.workload.dto.TrainerWorkloadRequestDto;
 import com.example.trainerworkloadservice.workload.model.TrainerWorkload;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,14 +34,19 @@ class TrainerWorkloadControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @MockitoBean
     private TrainerWorkloadService workloadService;
 
     @MockitoBean
     private JwtUtils jwtUtils;
+
+    @BeforeEach
+    void setUp() {
+        objectMapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule());
+    }
 
     @Test
     @DisplayName("POST /api/v1/workload returns 200 OK for valid payload")

@@ -58,12 +58,7 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.13.0")
 
-    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
-    implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
-    implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
-
-    implementation("org.springframework.boot:spring-boot-starter-grpc-client")
-    implementation("com.example:common-grpc:0.0.1-SNAPSHOT")
+    implementation("org.springframework.boot:spring-boot-starter-kafka:4.2.0-M1")
 }
 
 dependencyManagement {
