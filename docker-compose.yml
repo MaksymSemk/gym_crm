@@ -36,6 +36,20 @@ services:
     volumes:
       - kafka-data:/var/lib/kafka/data
 
+  mongodb:
+    image: mongo:latest
+    container_name: gym-crm-mongodb
+    hostname: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: pass
+      MONGO_INITDB_DATABASE: trainer_workload
+    ports:
+        - "27017:27017"
+    volumes:
+        - mongo_data:/data/db
+
 volumes:
   gym_crm_data:
   kafka-data:
+  mongo_data:
