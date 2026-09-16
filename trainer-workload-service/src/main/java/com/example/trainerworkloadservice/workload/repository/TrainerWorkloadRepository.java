@@ -1,22 +1,20 @@
 package com.example.trainerworkloadservice.workload.repository;
 
 import com.example.trainerworkloadservice.workload.model.TrainerWorkload;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-public class TrainerWorkloadRepository {
+public interface TrainerWorkloadRepository extends MongoRepository<TrainerWorkload, String> {
 
-    private final Map<String, TrainerWorkload> storage = new ConcurrentHashMap<>();
+    Optional<TrainerWorkload> findByTrainerUsername(String trainerUsername);
 
-    public Optional<TrainerWorkload> findByUsername(String username) {
-        return Optional.ofNullable(storage.get(username));
+    default Optional<TrainerWorkload> findByUsername(String username) {
+        return findById(username);
     }
 
-    public void save(TrainerWorkload workload) {
-        storage.put(workload.getTrainerUsername(), workload);
-    }
+    List<TrainerWorkload> findByTrainerFirstNameAndTrainerLastName(String trainerFirstName, String trainerLastName);
 }
