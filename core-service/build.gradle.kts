@@ -59,6 +59,14 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.13.0")
 
     implementation("org.springframework.boot:spring-boot-starter-kafka:4.2.0-M1")
+
+    testImplementation("io.cucumber:cucumber-java:7.34.8")
+    testImplementation("io.cucumber:cucumber-spring:7.34.8")
+    testImplementation("io.cucumber:cucumber-junit-platform-engine:7.34.8")
+
+    testImplementation("org.junit.platform:junit-platform-suite:1.11.4")
+
+    testImplementation("org.awaitility:awaitility:4.3.0")
 }
 
 dependencyManagement {
