@@ -91,4 +91,8 @@ public class LoginRateLimitFilter extends OncePerRequestFilter {
             attemptsMap.remove(usernameKey);
         }
     }
+
+    public void reset() {
+        attemptsMap.clear();
+    }
 }

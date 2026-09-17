@@ -1,5 +1,6 @@
 package com.example.gym_crm.training.Dto;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -18,5 +19,6 @@ public record TrainingCreateDto(
         LocalDate trainingDate,
 
         @NotNull(message = "Training duration is required")
+        @Min(value = 1, message = "Duration must be at least 1 minute")
         Integer trainingDuration
 ) {}
