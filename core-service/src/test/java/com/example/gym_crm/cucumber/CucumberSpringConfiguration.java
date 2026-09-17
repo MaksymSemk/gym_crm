@@ -17,7 +17,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @ActiveProfiles("test")
 public class CucumberSpringConfiguration {
 
-    // Singleton container shared across all Cucumber feature executions
     protected static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
             .withDatabaseName("gym_crm_cucumber_db")
             .withUsername("test_user")
