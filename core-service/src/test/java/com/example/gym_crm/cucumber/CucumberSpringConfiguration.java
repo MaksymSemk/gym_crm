@@ -34,7 +34,6 @@ public class CucumberSpringConfiguration {
         registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
         registry.add("spring.sql.init.mode", () -> "never");
-        // Disable Kafka publishing inside component tests by default
         registry.add("spring.kafka.listener.auto-startup", () -> "false");
     }
 

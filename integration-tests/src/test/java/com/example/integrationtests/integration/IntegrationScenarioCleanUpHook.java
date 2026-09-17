@@ -17,7 +17,6 @@ public class IntegrationScenarioCleanUpHook {
 
     @After(order = 1000)
     public void cleanUp() {
-        // Clean SQL
         jdbcTemplate.execute("DELETE FROM trainings");
         jdbcTemplate.execute("DELETE FROM trainer_trainee");
         jdbcTemplate.execute("DELETE FROM trainees");
@@ -25,7 +24,6 @@ public class IntegrationScenarioCleanUpHook {
         jdbcTemplate.execute("DELETE FROM users");
         jdbcTemplate.execute("DELETE FROM training_types");
 
-        // Clean Mongo
         mongoRepository.deleteAll();
 
         SecurityContextHolder.clearContext();

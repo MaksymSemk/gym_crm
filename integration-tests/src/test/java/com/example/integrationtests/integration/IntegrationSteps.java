@@ -191,7 +191,6 @@ public class IntegrationSteps {
 
     @When("a corrupted workload message with invalid JSON payload is published to topic {string}")
     public void publishCorruptedMessage(String topic) throws Exception {
-        // Send and block with .get() to guarantee the broker received the corrupted message
         kafkaTemplate.send(topic, "corrupted-key", "MALFORMED_NON_JSON_PAYLOAD").get(5, TimeUnit.SECONDS);
     }
 

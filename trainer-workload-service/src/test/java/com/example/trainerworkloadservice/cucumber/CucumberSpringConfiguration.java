@@ -15,7 +15,6 @@ import org.testcontainers.containers.MongoDBContainer;
 @ActiveProfiles("test")
 public class CucumberSpringConfiguration {
 
-    // Singleton MongoDB container shared across all scenarios
     protected static final MongoDBContainer mongoContainer = new MongoDBContainer("mongo:latest");
 
     static {
@@ -25,7 +24,7 @@ public class CucumberSpringConfiguration {
     @DynamicPropertySource
     static void configureMongoProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.mongodb.uri", mongoContainer::getReplicaSetUrl);
-        // Disable Kafka listener auto-startup during pure REST component tests
+
         registry.add("spring.kafka.listener.auto-startup", () -> "false");
         registry.add("eureka.client.enabled", () -> "false");
     }

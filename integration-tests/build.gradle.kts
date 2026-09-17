@@ -25,11 +25,9 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
 
 
-    // Project dependencies (for models, DTOs, clients)
     testImplementation(project(":core-service"))
     testImplementation(project(":trainer-workload-service"))
 
-    // Spring Boot Test & Web
     testImplementation("org.springframework.boot:spring-boot-starter-web")
     testImplementation("org.springframework.kafka:spring-kafka")
     testImplementation("org.springframework.boot:spring-boot-starter-data-mongodb")

@@ -127,7 +127,6 @@ public class TrainerTraineeSteps {
                 .trainings(new ArrayList<>())
                 .build();
 
-        // CascadeType.ALL on Trainee automatically persists the User with it
         traineeRepository.save(trainee);
     }
 

@@ -23,7 +23,6 @@ public class ScenarioCleanUpHook {
         jdbcTemplate.execute("DELETE FROM trainers");
         jdbcTemplate.execute("DELETE FROM users");
 
-        // Clear in-memory lockout map so subsequent scenarios start fresh
         loginRateLimitFilter.reset();
         SecurityContextHolder.clearContext();
     }

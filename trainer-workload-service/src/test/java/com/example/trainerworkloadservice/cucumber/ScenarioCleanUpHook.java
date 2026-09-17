@@ -14,7 +14,6 @@ public class ScenarioCleanUpHook {
 
     @After(order = 1000)
     public void cleanUp() {
-        // Wipe Mongo documents between scenarios
         repository.deleteAll();
         SecurityContextHolder.clearContext();
     }

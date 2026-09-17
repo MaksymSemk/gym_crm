@@ -124,7 +124,6 @@ public class TrainingSteps {
                 Integer.parseInt(row.get("trainingDuration"))
         );
 
-        // Generate token for the trainee submitting the training session
         org.springframework.security.core.userdetails.User principal =
                 new org.springframework.security.core.userdetails.User(
                         row.get("traineeUsername"),
