@@ -51,7 +51,7 @@ class TransactionLoggingFilterTest {
         filter.doFilterInternal(request, response, filterChain);
 
         verify(response).setHeader(TransactionLoggingFilter.TRANSACTION_ID_HEADER, "tx-12345");
-        assertThat(MDC.get(TransactionLoggingFilter.MDC_TRANSACTION_ID_KEY)).isNull(); // Cleared in finally
+        assertThat(MDC.get(TransactionLoggingFilter.MDC_TRANSACTION_ID_KEY)).isNull();
     }
 
     @Test
